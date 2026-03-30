@@ -5,151 +5,172 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bremen Route</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
-
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <header class="topbar">
+    <nav class="nav">
+      <a href="index.html" class="active">Karte</a>
+      <a href="archiv.html">Archiv</a>
+    </nav>
+  </header>
 
-<header>
-  <nav>
-    <a href="#">Karte</a>
-    <a href="archiv.html">Archiv</a>
-  </nav>
-</header>
+  <main>
+    <div id="map"></div>
 
-<div id="map"></div>
+    <section id="archive-panel" class="panel-half">
+      <div class="panel-bar">
+        <div class="panel-handle"></div>
+        <div class="panel-controls">
+          <button id="panel-smaller" type="button" aria-label="Archiv kleiner">–</button>
+          <button id="panel-larger" type="button" aria-label="Archiv größer">+</button>
+        </div>
+      </div>
 
-<div id="sidebar">
-  <div id="resize-handle"></div>
-  <h2>Archiv</h2>
-  <div id="content"></div>
-</div>
+      <div class="panel-content">
+        <div class="panel-header">
+          <h2>Archiv</h2>
+          <p>Doppelklicke auf Marker, um mehrere Einträge gleichzeitig zu öffnen.</p>
+        </div>
 
-<footer>
-  <div class="footer-content">
-    <span>Bremen Projekt</span>
-    <span>2026</span>
-  </div>
-</footer>
+        <div id="content"></div>
+      </div>
+    </section>
+  </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+  <footer class="footer">
+    <div class="footer-content">
+      <span>Bremen Projekt</span>
+      <span>2026</span>
+    </div>
+  </footer>
 
-<script>
-const map = L.map('map', {
-  doubleClickZoom: false
-}).setView([53.09, 8.78], 14);
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  <script>
+    const map = L.map('map', {
+      doubleClickZoom: false
+    }).setView([53.09, 8.78], 14);
 
-// 📍 Deine Stationen
-const stations = [
-  { id:1, name:"Schlachte (Löwe)", coords:[53.0759,8.8047], info:"Startpunkt an der Weser."},
-  { id:2, name:"Kellogggebäude", coords:[53.0897,8.7878], info:"Überseeinsel Bereich."},
-  { id:3, name:"Europahafen", coords:[53.0889,8.7706], info:"Hafenpromenade."},
-  { id:4, name:"Molenturm", coords:[53.1062,8.7477], info:"Markanter Endpunkt."},
-  { id:5, name:"Hafencasino", coords:[53.0997,8.7617], info:"Sozialer Treffpunkt."},
-  { id:6, name:"Gästehaus", coords:[53.0980,8.7589], info:"Cuxhavener Straße."},
-  { id:7, name:"Ulrichsschuppen", coords:[53.1012,8.7568], info:"Gedenkort."}
-];
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
 
-// 🧭 Route steuern (hier kannst du Verlauf ändern!)
-const routePoints = [
-  [53.0759,8.8047],
-  [53.0800,8.8000],
-  [53.0850,8.7920],
-  [53.0897,8.7878],
-  [53.0889,8.7706],
-  [53.0950,8.7600],
-  [53.1000,8.7520],
-  [53.1062,8.7477],
-  [53.0997,8.7617],
-  [53.0980,8.7589],
-  [53.1012,8.7568]
-];
+    const stations = [
+      { id: 1, name: "Löwe an der Schlachte", coords: [53.0759, 8.8047], info: "Startpunkt an der Schlachte an der Weser." },
+      { id: 2, name: "Kellogggebäude", coords: [53.0897, 8.7878], info: "Bereich der Überseeinsel mit ehemaligem Kellogg-Areal." },
+      { id: 3, name: "Europahafen", coords: [53.0889, 8.7706], info: "Zentraler öffentlicher Raum in der Überseestadt." },
+      { id: 4, name: "Molenturm", coords: [53.1062, 8.7477], info: "Markanter Punkt am Wasser." },
+      { id: 5, name: "Hafencasino", coords: [53.0997, 8.7617], info: "Treffpunkt im Hafenumfeld." },
+      { id: 6, name: "Gästehaus Cuxhavener Straße", coords: [53.0980, 8.7589], info: "Station an der Cuxhavener Straße." },
+      { id: 7, name: "Gedenkort Ulrichsschuppen", coords: [53.1012, 8.7568], info: "Erinnerungsort im Hafengebiet." }
+    ];
 
-// Marker
-stations.forEach(station=>{
-  const marker = L.marker(station.coords).addTo(map);
+    const routePoints = [
+      [53.0759, 8.8047],
+      [53.0800, 8.8000],
+      [53.0850, 8.7920],
+      [53.0897, 8.7878],
+      [53.0889, 8.7706],
+      [53.0950, 8.7600],
+      [53.1000, 8.7520],
+      [53.1062, 8.7477],
+      [53.0997, 8.7617],
+      [53.0980, 8.7589],
+      [53.1012, 8.7568]
+    ];
 
-  marker.on('dblclick', ()=>{
-    addCard(station);
-  });
+    stations.forEach((station) => {
+      const marker = L.marker(station.coords).addTo(map);
 
-  marker.bindPopup(station.name);
-});
+      marker.bindPopup(station.name);
 
-// Routing (Fahrrad)
-L.Routing.control({
-  waypoints: routePoints.map(p=>L.latLng(p)),
-  router: L.Routing.osrmv1({
-    serviceUrl: "https://routing.openstreetmap.de/routed-bike/route/v1"
-  }),
-  lineOptions:{ styles:[{color:'black',weight:4}]},
-  addWaypoints:false,
-  draggableWaypoints:false,
-  createMarker:()=>null
-}).addTo(map);
+      marker.on('dblclick', () => {
+        addCard(station);
+        setPanelState('half');
+      });
+    });
 
-// Sidebar Cards
-function addCard(station){
-  const container = document.getElementById("content");
+    L.Routing.control({
+      waypoints: routePoints.map(p => L.latLng(p[0], p[1])),
+      router: L.Routing.osrmv1({
+        serviceUrl: "https://routing.openstreetmap.de/routed-bike/route/v1"
+      }),
+      lineOptions: {
+        styles: [{ color: 'black', weight: 4 }]
+      },
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      show: false,
+      createMarker: () => null
+    }).addTo(map);
 
-  const card = document.createElement("div");
-  card.className = "card";
+    function addCard(station) {
+      const container = document.getElementById("content");
+      const existing = document.getElementById(`card-${station.id}`);
 
-  card.innerHTML = `
-    <span class="close">✕</span>
-    <h3>${station.name}</h3>
-    <p>${station.info}</p>
-  `;
+      if (existing) {
+        existing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
 
-  card.querySelector(".close").onclick = ()=>card.remove();
+      const card = document.createElement("article");
+      card.className = "card";
+      card.id = `card-${station.id}`;
 
-  container.prepend(card);
-}
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="card-number">${String(station.id).padStart(2, '0')}</span>
+          <button class="close" type="button" aria-label="Eintrag schließen">×</button>
+        </div>
+        <h3>${station.name}</h3>
+        <p>${station.info}</p>
+      `;
 
-// 🔥 RESIZE (MOUSE + TOUCH)
-const sidebar = document.getElementById("sidebar");
-const handle = document.getElementById("resize-handle");
+      card.querySelector(".close").addEventListener("click", () => {
+        card.remove();
+      });
 
-let resizing=false;
+      container.prepend(card);
+    }
 
-handle.addEventListener("mousedown", start);
-handle.addEventListener("touchstart", start);
+    const panel = document.getElementById('archive-panel');
+    const smallerBtn = document.getElementById('panel-smaller');
+    const largerBtn = document.getElementById('panel-larger');
 
-function start(){ resizing=true; }
+    const states = ['collapsed', 'half', 'full'];
 
-document.addEventListener("mousemove", move);
-document.addEventListener("touchmove", move);
+    function getPanelState() {
+      for (const state of states) {
+        if (panel.classList.contains(`panel-${state}`)) return state;
+      }
+      return 'half';
+    }
 
-function move(e){
-  if(!resizing) return;
+    function setPanelState(state) {
+      panel.classList.remove('panel-collapsed', 'panel-half', 'panel-full');
+      panel.classList.add(`panel-${state}`);
+      setTimeout(() => map.invalidateSize(), 320);
+    }
 
-  let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    smallerBtn.addEventListener('click', () => {
+      const current = getPanelState();
+      if (current === 'full') setPanelState('half');
+      else if (current === 'half') setPanelState('collapsed');
+    });
 
-  let width = window.innerWidth - clientX;
+    largerBtn.addEventListener('click', () => {
+      const current = getPanelState();
+      if (current === 'collapsed') setPanelState('half');
+      else if (current === 'half') setPanelState('full');
+    });
 
-  if(width < 250) width = 250;
-
-  sidebar.style.width = width + "px";
-  document.getElementById("map").style.width =
-    `calc(100% - ${width}px)`;
-
-  map.invalidateSize();
-}
-
-document.addEventListener("mouseup", stop);
-document.addEventListener("touchend", stop);
-
-function stop(){ resizing=false; }
-
-</script>
-
+    setTimeout(() => map.invalidateSize(), 400);
+  </script>
 </body>
 </html>
