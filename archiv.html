@@ -2,159 +2,23 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Route Bremen – Archiv</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
-
-  <link rel="stylesheet" href="style.css" />
-
-  <style>
-    .archive-page {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 100%;
-      height: calc(100vh - 64px - 44px);
-      padding: 24px;
-      overflow-y: auto;
-      background: #fff;
-    }
-
-    .archive-header {
-      margin-bottom: 24px;
-      border-bottom: 1px solid #000;
-      padding-bottom: 16px;
-    }
-
-    .archive-header h1 {
-      margin: 0 0 8px 0;
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .archive-header p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .archive-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .archive-tile {
-      border: 1px solid #000;
-      padding: 16px;
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .archive-tile small {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .archive-tile h2 {
-      margin: 10px 0 8px 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .archive-tile p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 900px) {
-      .archive-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <title>Archiv</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <header class="topbar">
-    <nav class="nav">
-      <a class="nav-link" href="index.html">Karte</a>
-      <a class="nav-link active" href="archiv.html">Archiv</a>
-    </nav>
-  </header>
 
-  <main class="archive-page">
-    <div class="archive-header">
-      <h1>Archiv</h1>
-      <p>Platzhalterseite für Informationskacheln, Texte, Bilder, Quellen oder Materialsammlungen.</p>
-    </div>
+<header>
+  <nav>
+    <a href="index.html">Karte</a>
+    <a href="#">Archiv</a>
+  </nav>
+</header>
 
-    <section class="archive-grid">
-      <article class="archive-tile">
-        <small>01</small>
-        <div>
-          <h2>Schlachte</h2>
-          <p>Hier kann später Material zum Startpunkt eingefügt werden.</p>
-        </div>
-      </article>
+<div style="padding:80px;">
+  <h1>Archiv</h1>
+  <p>Hier kannst du später Inhalte einbauen.</p>
+</div>
 
-      <article class="archive-tile">
-        <small>02</small>
-        <div>
-          <h2>Überseeinsel / Kellogg</h2>
-          <p>Platzhalter für Zeichnungen, Analysen, Fotos oder historische Einordnung.</p>
-        </div>
-      </article>
-
-      <article class="archive-tile">
-        <small>03</small>
-        <div>
-          <h2>Europahafen</h2>
-          <p>Platzhalter für weitere Inhalte.</p>
-        </div>
-      </article>
-
-      <article class="archive-tile">
-        <small>04</small>
-        <div>
-          <h2>Molenturm</h2>
-          <p>Platzhalter für weitere Inhalte.</p>
-        </div>
-      </article>
-
-      <article class="archive-tile">
-        <small>05</small>
-        <div>
-          <h2>Hafencasino</h2>
-          <p>Platzhalter für weitere Inhalte.</p>
-        </div>
-      </article>
-
-      <article class="archive-tile">
-        <small>06</small>
-        <div>
-          <h2>Cuxhavener Straße</h2>
-          <p>Platzhalter für weitere Inhalte.</p>
-        </div>
-      </article>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      <span>Projekt: Route entlang der Weser / Überseestadt</span>
-      <span>Bremen</span>
-    </div>
-  </footer>
 </body>
 </html>
