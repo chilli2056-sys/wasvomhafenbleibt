@@ -1,101 +1,238 @@
 * {
-  border-radius: 0 !important;
   box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 body {
-  margin: 0;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: white;
+  color: black;
+  overflow: hidden;
 }
 
-/* HEADER */
-header {
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Kopfleiste */
+.topbar {
   position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
+  height: 60px;
   background: white;
   border-bottom: 1px solid black;
-  padding: 15px 30px;
-  z-index: 1000;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
 }
 
-nav a {
-  margin-right: 30px;
-  text-decoration: none;
-  color: black;
+.nav {
+  display: flex;
+  gap: 28px;
 }
 
-/* MAP */
+.nav a {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nav a.active {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Karte */
 #map {
-  position: absolute;
+  position: fixed;
   top: 60px;
   left: 0;
+  width: 100%;
   height: calc(100vh - 100px);
-  width: calc(100% - 350px);
+  z-index: 1;
 }
 
-/* SIDEBAR */
-#sidebar {
-  position: absolute;
-  top: 60px;
-  right: 0;
-  width: 350px;
-  height: calc(100vh - 100px);
-  border-left: 1px solid black;
-  padding: 20px;
-  overflow-y: auto;
-  background: white;
-}
-
-/* RESIZE HANDLE */
-#resize-handle {
-  position: absolute;
-  left: -10px;
-  width: 20px;
-  height: 100%;
-  cursor: ew-resize;
-}
-
-/* CARDS */
-.card {
-  border-bottom: 1px solid black;
-  padding: 15px 0;
-}
-
-.card h3 {
-  margin: 0;
-}
-
-.card p {
-  margin: 5px 0;
-}
-
-.close {
-  float: right;
-  cursor: pointer;
-}
-
-/* FOOTER */
-footer {
+/* Footer */
+.footer {
   position: fixed;
+  left: 0;
   bottom: 0;
   width: 100%;
   height: 40px;
   border-top: 1px solid black;
   background: white;
+  z-index: 2000;
   display: flex;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 24px;
 }
 
 .footer-content {
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Leaflet kantig */
+/* Unteres Archivpanel */
+#archive-panel {
+  position: fixed;
+  left: 0;
+  bottom: 40px;
+  width: 100%;
+  background: white;
+  border-top: 1px solid black;
+  z-index: 1800;
+  transition: height 0.3s ease;
+  overflow: hidden;
+}
+
+.panel-collapsed {
+  height: 36px;
+}
+
+.panel-half {
+  height: 50vh;
+}
+
+.panel-full {
+  height: calc(100vh - 60px - 40px);
+}
+
+.panel-bar {
+  height: 36px;
+  border-bottom: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.panel-handle {
+  width: 64px;
+  height: 6px;
+  border: 1px solid black;
+}
+
+.panel-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.panel-controls button {
+  width: 32px;
+  height: 24px;
+  border: 1px solid black;
+  background: white;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.panel-controls button:hover {
+  background: black;
+  color: white;
+}
+
+.panel-content {
+  height: calc(100% - 36px);
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.panel-header {
+  border-bottom: 1px solid black;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.panel-header p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Karten im Archiv */
+.card {
+  border-top: 1px solid black;
+  padding: 14px 0 16px 0;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-number {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid black;
+  background: white;
+  color: black;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: black;
+  color: white;
+}
+
+/* Leaflet eckig */
 .leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
+.leaflet-popup-tip,
+.leaflet-bar a,
+.leaflet-control-zoom a {
   border-radius: 0 !important;
+}
+
+/* Routing-Panel ausblenden */
+.leaflet-routing-container {
+  display: none !important;
 }
