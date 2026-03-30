@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Bremen – Karte</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <nav class="nav">
+      <a class="nav-link active" href="index.html">Karte</a>
+      <a class="nav-link" href="archiv.html">Archiv</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section id="map" aria-label="Karte von Bremen"></section>
+
+    <aside id="sidebar" aria-label="Archiv und Informationen">
+      <div id="resize-handle" aria-hidden="true"></div>
+
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <h1>Archiv</h1>
+          <p>
+            Doppelklicke auf einen Marker, um einen Eintrag zu öffnen.
+            Mehrere Einträge können gleichzeitig sichtbar bleiben.
+          </p>
+        </div>
+
+        <div id="card-container" class="card-container"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>Projekt: Route entlang der Weser / Überseestadt</span>
+      <span>Bremen</span>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+  <script>
+    const map = L.map("map", {
+      zoomControl: true,
+      doubleClickZoom: false
+    }).setView([53.091, 8.782], 14);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    const stations = [
+      {
+        id: 1,
+        name: "Markierung 1 — Löwe an der Schlachte",
+        coords: [53.0759, 8.8047],
+        title: "Löwe an der Schlachte",
+        text: "Startpunkt an der Schlachte. Von hier beginnt die Route entlang der Weser Richtung Überseestadt."
+      },
+      {
+        id: 2,
+        name: "Markierung 2 — Kellogggebäude",
+        coords: [53.0897, 8.7878],
+        title: "Kellogggebäude / Überseeinsel",
+        text: "Ehemaliges Kellogg-Areal an der Weser. Dieser Punkt markiert den Übergang von der Schlachte in die Überseestadt."
+      },
+      {
+        id: 3,
+        name: "Markierung 3 — Europahafen",
+        coords: [53.0889, 8.7706],
+        title: "Europahafen",
+        text: "Der Europahafen bildet einen zentralen öffentlichen Raum der Überseestadt mit Promenade, Wasserkante und neuen Nutzungen."
+      },
+      {
+        id: 4,
+        name: "Markierung 4 — Molenturm",
+        coords: [53.10623, 8.74775],
+        title: "Molenturm",
+        text: "Der Molenturm liegt an der südlichen Mole des Überseehafens und bildet einen markanten Endpunkt am Wasser."
+      },
+      {
+        id: 5,
+        name: "Markierung 5 — Hafencasino",
+        coords: [53.0997, 8.7617],
+        title: "Hafencasino",
+        text: "Das Hafencasino liegt am Holz- und Fabrikenhafen und ist ein wichtiger sozialer Ort im Hafenumfeld."
+      },
+      {
+        id: 6,
+        name: "Markierung 6 — Gästehaus Cuxhavener Straße",
+        coords: [53.0980, 8.7589],
+        title: "Gästehaus / Alte Stauerei",
+        text: "Punkt an der Cuxhavener Straße 7. Kann als Aufenthalts-, Produktions- oder Rechercheort im Projektkontext gelesen werden."
+      },
+      {
+        id: 7,
+        name: "Markierung 7 — Gedenkort Ulrichsschuppen",
+        coords: [53.1012, 8.7568],
+        title: "Gedenkort Ulrichsschuppen",
+        text: "Gedenkort an der Ecke Memeler / Revaler Straße. Abschluss- bzw. Erinnerungsort innerhalb der Route."
+      }
+    ];
+
+    const cardContainer = document.getElementById("card-container");
+
+    function addCard(station) {
+      const existing = document.getElementById(`card-${station.id}`);
+      if (existing) {
+        existing.scrollIntoView({ behavior: "smooth", block: "start" });
+        existing.classList.add("highlight");
+        setTimeout(() => existing.classList.remove("highlight"), 800);
+        return;
+      }
+
+      const card = document.createElement("article");
+      card.className = "info-card";
+      card.id = `card-${station.id}`;
+
+      card.innerHTML = `
+        <div class="info-card-top">
+          <div class="info-card-number">0${station.id}</div>
+          <button class="close-btn" aria-label="Eintrag schließen">×</button>
+        </div>
+        <h2>${station.title}</h2>
+        <p>${station.text}</p>
+        <div class="meta">
+          <span>${station.name}</span>
+          <span>${station.coords[0].toFixed(5)}, ${station.coords[1].toFixed(5)}</span>
+        </div>
+      `;
+
+      card.querySelector(".close-btn").addEventListener("click", () => {
+        card.remove();
+      });
+
+      cardContainer.prepend(card);
+    }
+
+    // Eigene Marker
+    stations.forEach((station) => {
+      const marker = L.marker(station.coords).addTo(map);
+
+      marker.bindPopup(station.title);
+
+      marker.on("dblclick", () => {
+        addCard(station);
+      });
+    });
+
+    // Fahrradroute über öffentliche OSM-DE-Routing-Instanz
+    const routingControl = L.Routing.control({
+      waypoints: stations.map((station) => L.latLng(station.coords[0], station.coords[1])),
+      router: L.Routing.osrmv1({
+        serviceUrl: "https://routing.openstreetmap.de/routed-bike/route/v1",
+        profile: "driving",
+        language: "de"
+      }),
+      lineOptions: {
+        styles: [
+          {
+            color: "#000000",
+            opacity: 1,
+            weight: 4
+          }
+        ],
+        extendToWaypoints: true,
+        missingRouteTolerance: 0
+      },
+      routeWhileDragging: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      showAlternatives: false,
+      createMarker: function () {
+        return null;
+      }
+    }).addTo(map);
+
+    // Routing-Panel von Leaflet Routing Machine ausblenden,
+    // weil die Infos rechts in unserem eigenen Archiv erscheinen sollen.
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .leaflet-routing-container {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Resizable Sidebar
+    const sidebar = document.getElementById("sidebar");
+    const resizeHandle = document.getElementById("resize-handle");
+    const mapElement = document.getElementById("map");
+
+    let isResizing = false;
+
+    resizeHandle.addEventListener("mousedown", () => {
+      isResizing = true;
+      document.body.classList.add("resizing");
+    });
+
+    document.addEventListener("mousemove", (event) => {
+      if (!isResizing) return;
+
+      const minWidth = 280;
+      const maxWidth = window.innerWidth * 0.65;
+      let newWidth = window.innerWidth - event.clientX;
+
+      if (newWidth < minWidth) newWidth = minWidth;
+      if (newWidth > maxWidth) newWidth = maxWidth;
+
+      sidebar.style.width = `${newWidth}px`;
+      mapElement.style.width = `calc(100% - ${newWidth}px)`;
+
+      map.invalidateSize();
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (!isResizing) return;
+      isResizing = false;
+      document.body.classList.remove("resizing");
+    });
+  </script>
+</body>
+</html>
