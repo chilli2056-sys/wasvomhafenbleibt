@@ -1,249 +1,101 @@
 * {
-  box-sizing: border-box;
   border-radius: 0 !important;
+  box-sizing: border-box;
 }
 
-html,
 body {
   margin: 0;
-  padding: 0;
-  height: 100%;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
 }
 
-body {
-  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #000;
-  background: #fff;
-  overflow: hidden;
-}
-
-a {
-  color: inherit;
-}
-
-.topbar {
+/* HEADER */
+header {
   position: fixed;
   top: 0;
-  left: 0;
   width: 100%;
-  height: 64px;
-  background: #fff;
-  border-bottom: 1px solid #000;
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
+  background: white;
+  border-bottom: 1px solid black;
+  padding: 15px 30px;
+  z-index: 1000;
 }
 
-.nav {
-  display: flex;
-  gap: 24px;
-}
-
-.nav-link {
+nav a {
+  margin-right: 30px;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  color: black;
 }
 
-.nav-link.active {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.layout {
-  position: fixed;
-  top: 64px;
-  left: 0;
-  width: 100%;
-  height: calc(100vh - 64px - 44px);
-}
-
+/* MAP */
 #map {
   position: absolute;
-  top: 0;
+  top: 60px;
   left: 0;
-  width: calc(100% - 360px);
-  height: 100%;
+  height: calc(100vh - 100px);
+  width: calc(100% - 350px);
 }
 
+/* SIDEBAR */
 #sidebar {
   position: absolute;
-  top: 0;
+  top: 60px;
   right: 0;
-  width: 360px;
-  height: 100%;
-  background: #fff;
-  border-left: 1px solid #000;
-  overflow: hidden;
+  width: 350px;
+  height: calc(100vh - 100px);
+  border-left: 1px solid black;
+  padding: 20px;
+  overflow-y: auto;
+  background: white;
 }
 
+/* RESIZE HANDLE */
 #resize-handle {
   position: absolute;
-  left: -4px;
-  top: 0;
-  width: 8px;
+  left: -10px;
+  width: 20px;
   height: 100%;
   cursor: ew-resize;
-  background: transparent;
-  z-index: 20;
 }
 
-.sidebar-inner {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 20px 18px 24px 18px;
+/* CARDS */
+.card {
+  border-bottom: 1px solid black;
+  padding: 15px 0;
 }
 
-.sidebar-header {
-  padding-bottom: 18px;
-  border-bottom: 1px solid #000;
-  margin-bottom: 18px;
-}
-
-.sidebar-header h1 {
-  margin: 0 0 10px 0;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.sidebar-header p {
+.card h3 {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  font-weight: 400;
 }
 
-.card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.card p {
+  margin: 5px 0;
 }
 
-.info-card {
-  border-top: 1px solid #000;
-  padding: 16px 0 18px 0;
-  transition: background-color 0.2s ease;
-}
-
-.info-card.highlight {
-  background: #f2f2f2;
-}
-
-.info-card:first-child {
-  border-top: 1px solid #000;
-}
-
-.info-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.info-card-number {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.close-btn {
-  appearance: none;
-  background: transparent;
-  border: 1px solid #000;
-  color: #000;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  font-size: 20px;
-  line-height: 1;
+.close {
+  float: right;
   cursor: pointer;
 }
 
-.close-btn:hover {
-  background: #000;
-  color: #fff;
-}
-
-.info-card h2 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.info-card p {
-  margin: 0 0 14px 0;
-  font-size: 14px;
-  line-height: 1.55;
-  font-weight: 400;
-}
-
-.meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.footer {
+/* FOOTER */
+footer {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
-  height: 44px;
-  border-top: 1px solid #000;
-  background: #fff;
-  z-index: 2000;
+  height: 40px;
+  border-top: 1px solid black;
+  background: white;
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 30px;
 }
 
-.footer-inner {
-  width: 100%;
+.footer-content {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  width: 100%;
 }
 
-/* Leaflet-UI eckig */
-.leaflet-control-zoom a,
-.leaflet-bar a,
+/* Leaflet kantig */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   border-radius: 0 !important;
-}
-
-.leaflet-control-zoom a,
-.leaflet-bar a {
-  color: #000;
-}
-
-.resizing {
-  cursor: ew-resize;
-  user-select: none;
-}
-
-/* Kleine Bildschirme */
-@media (max-width: 900px) {
-  #map {
-    width: calc(100% - 300px);
-  }
-
-  #sidebar {
-    width: 300px;
-  }
 }
