@@ -56,18 +56,8 @@ stations.forEach(station => {
     <div class="kachel-label">${station.name}</div>
   `;
 
-  // Doppelklick → Detail-Leiste
-  kachel.addEventListener('dblclick', () => openDetail(station));
-
-  // Touch Long-Press
-  let pressTimer = null;
-  let moved = false;
-  kachel.addEventListener('touchstart', () => {
-    moved = false;
-    pressTimer = setTimeout(() => { if (!moved) openDetail(station); }, 600);
-  });
-  kachel.addEventListener('touchmove', () => { moved = true; clearTimeout(pressTimer); });
-  kachel.addEventListener('touchend', () => clearTimeout(pressTimer));
+  // Einfacher Tap / Klick → Detail-Leiste
+  kachel.addEventListener('click', () => openDetail(station));
 
   grid.appendChild(kachel);
 });
@@ -83,16 +73,49 @@ const MAX_H = () => window.innerHeight - 60 - 40;
 
 let dragging = false, startY = 0, startH = 0;
 
-function getY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+function getY(e) {
+  return e.touches ? e.touches[0].clientY : e.clientY;
+}
 
-archivHandle.addEventListener('mousedown',  e => { dragging=true; startY=getY(e); startH=archivSidebar.offsetHeight; document.body.style.userSelect='none'; });
-archivHandle.addEventListener('touchstart', e => { dragging=true; startY=getY(e); startH=archivSidebar.offsetHeight; }, {passive:true});
+archivHandle.addEventListener('mousedown', e => {
+  dragging = true;
+  startY = getY(e);
+  startH = archivSidebar.offsetHeight;
+  document.body.style.userSelect = 'none';
+});
 
-document.addEventListener('mousemove',  e => { if(!dragging) return; let h=startH+(startY-getY(e)); h=Math.max(MIN_H,Math.min(h,MAX_H())); archivSidebar.style.height=h+'px'; archivToggle.textContent=h>MIN_H?'▼':'▲'; });
-document.addEventListener('touchmove',  e => { if(!dragging) return; let h=startH+(startY-getY(e)); h=Math.max(MIN_H,Math.min(h,MAX_H())); archivSidebar.style.height=h+'px'; archivToggle.textContent=h>MIN_H?'▼':'▲'; }, {passive:true});
+archivHandle.addEventListener('touchstart', e => {
+  dragging = true;
+  startY = getY(e);
+  startH = archivSidebar.offsetHeight;
+}, { passive: true });
 
-document.addEventListener('mouseup',  () => { dragging=false; document.body.style.userSelect=''; snap(); });
-document.addEventListener('touchend', () => { dragging=false; snap(); });
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  let h = startH + (startY - getY(e));
+  h = Math.max(MIN_H, Math.min(h, MAX_H()));
+  archivSidebar.style.height = h + 'px';
+  archivToggle.textContent = h > MIN_H ? '▼' : '▲';
+});
+
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  let h = startH + (startY - getY(e));
+  h = Math.max(MIN_H, Math.min(h, MAX_H()));
+  archivSidebar.style.height = h + 'px';
+  archivToggle.textContent = h > MIN_H ? '▼' : '▲';
+}, { passive: true });
+
+document.addEventListener('mouseup', () => {
+  dragging = false;
+  document.body.style.userSelect = '';
+  snap();
+});
+
+document.addEventListener('touchend', () => {
+  dragging = false;
+  snap();
+});
 
 function snap() {
   if (archivSidebar.offsetHeight < MIN_H + 20) {
