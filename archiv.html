@@ -6,6 +6,27 @@
   <title>Archiv</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    #archiv-grid {
+      top: 60px;
+      bottom: 96px;
+    }
+
+    #archiv-sidebar {
+      bottom: 96px;
+    }
+
+    @media (max-width: 700px) {
+      #archiv-grid {
+        bottom: 108px;
+        padding: 14px;
+      }
+
+      #archiv-sidebar {
+        bottom: 108px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -17,10 +38,8 @@
   </nav>
 </header>
 
-<!-- Kachel-Grid -->
 <div id="archiv-grid"></div>
 
-<!-- Detail-Leiste unten (wie Sidebar auf Kartenseite) -->
 <div id="archiv-sidebar">
   <div id="archiv-handle">
     <span>Details</span>
@@ -31,6 +50,8 @@
   </div>
 </div>
 
+<div id="themen-bar"></div>
+
 <footer>
   <div class="footer-content">
     <span>Bremen Projekt</span>
@@ -40,38 +61,113 @@
 
 <script src="stations.js"></script>
 <script>
-// Kacheln rendern
 const grid = document.getElementById('archiv-grid');
+const themenBar = document.getElementById('themen-bar');
 
-stations.forEach(station => {
-  const kachel = document.createElement('div');
-  kachel.className = 'kachel';
+const filters = {
+  selectedThemen: []
+};
 
-  const fotoHtml = station.foto
-    ? `<img src="${station.foto}" alt="${station.name}" />`
-    : `<div class="kachel-placeholder"><span>${station.name}</span></div>`;
+function getAlleThemen() {
+  const allThemes = stations.flatMap(station => station.themen || []);
+  return [...new Set(allThemes)];
+}
 
-  kachel.innerHTML = `
-    ${fotoHtml}
-    <div class="kachel-label">${station.name}</div>
-  `;
+function formatLabel(text) {
+  return text
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
 
-  // Einfacher Tap / Klick → Detail-Leiste
-  kachel.addEventListener('click', () => openDetail(station));
+function toggleThema(thema) {
+  const index = filters.selectedThemen.indexOf(thema);
 
-  grid.appendChild(kachel);
-});
+  if (index > -1) {
+    filters.selectedThemen.splice(index, 1);
+  } else {
+    filters.selectedThemen.push(thema);
+  }
 
-// Detail-Leiste
+  renderThemenBar();
+  updateArchiv();
+}
+
+function filterStations(allStations) {
+  if (filters.selectedThemen.length === 0) {
+    return allStations;
+  }
+
+  return allStations.filter(station => {
+    const stationThemen = station.themen || [];
+    return filters.selectedThemen.some(thema => stationThemen.includes(thema));
+  });
+}
+
+function renderThemenBar() {
+  const themen = getAlleThemen();
+  themenBar.innerHTML = '';
+
+  themen.forEach(thema => {
+    const chip = document.createElement('button');
+    chip.className = 'themen-chip';
+    chip.textContent = formatLabel(thema);
+
+    if (filters.selectedThemen.includes(thema)) {
+      chip.classList.add('active');
+    }
+
+    chip.addEventListener('click', () => toggleThema(thema));
+    themenBar.appendChild(chip);
+  });
+}
+
+function renderArchiv(filteredStations) {
+  grid.innerHTML = '';
+
+  if (filteredStations.length === 0) {
+    grid.innerHTML = `
+      <p style="padding:10px;background:transparent;display:inline-block;border:1px solid black;">
+        Keine Orte für diese Auswahl gefunden.
+      </p>
+    `;
+    return;
+  }
+
+  filteredStations.forEach(station => {
+    const kachel = document.createElement('div');
+    kachel.className = 'kachel';
+
+    const fotoHtml = station.foto
+      ? `<img src="${station.foto}" alt="${station.name}" />`
+      : `<div class="kachel-placeholder"><span>${station.name}</span></div>`;
+
+    kachel.innerHTML = `
+      ${fotoHtml}
+      <div class="kachel-label">${station.name}</div>
+    `;
+
+    kachel.addEventListener('click', () => openDetail(station));
+    grid.appendChild(kachel);
+  });
+}
+
+function updateArchiv() {
+  const filtered = filterStations(stations);
+  renderArchiv(filtered);
+}
+
 const archivSidebar = document.getElementById('archiv-sidebar');
 const archivHandle  = document.getElementById('archiv-handle');
 const archivToggle  = document.getElementById('archiv-toggle');
 const archivContent = document.getElementById('archiv-content');
 
 const MIN_H = 48;
-const MAX_H = () => window.innerHeight - 60 - 40;
+const MAX_H = () => window.innerHeight - 60 - 96;
 
-let dragging = false, startY = 0, startH = 0;
+let dragging = false;
+let startY = 0;
+let startH = 0;
 
 function getY(e) {
   return e.touches ? e.touches[0].clientY : e.clientY;
@@ -92,6 +188,7 @@ archivHandle.addEventListener('touchstart', e => {
 
 document.addEventListener('mousemove', e => {
   if (!dragging) return;
+
   let h = startH + (startY - getY(e));
   h = Math.max(MIN_H, Math.min(h, MAX_H()));
   archivSidebar.style.height = h + 'px';
@@ -100,6 +197,7 @@ document.addEventListener('mousemove', e => {
 
 document.addEventListener('touchmove', e => {
   if (!dragging) return;
+
   let h = startH + (startY - getY(e));
   h = Math.max(MIN_H, Math.min(h, MAX_H()));
   archivSidebar.style.height = h + 'px';
@@ -132,10 +230,12 @@ archivToggle.addEventListener('click', e => {
 });
 
 function openDetail(station) {
-  archivContent.innerHTML = '';
+  const themenText = station.themen ? station.themen.join(', ') : '';
+  const routenText = station.routen ? station.routen.join(', ') : '';
+  const zeitText = station.zeitspannen ? station.zeitspannen.join(', ') : '';
 
   const fotoHtml = station.foto
-    ? `<img src="${station.foto}" alt="${station.name}" style="max-height:35vh;width:auto;display:block;margin:8px 0;" />`
+    ? `<img src="${station.foto}" alt="${station.name}" class="card-foto" />`
     : `<div class="card-foto-placeholder"><span>${station.name}</span></div>`;
 
   archivContent.innerHTML = `
@@ -143,15 +243,20 @@ function openDetail(station) {
       <h3>${station.name}</h3>
       ${fotoHtml}
       <p>${station.info}</p>
+      <p><strong>Themen:</strong> ${themenText}</p>
+      <p><strong>Routen:</strong> ${routenText}</p>
+      <p><strong>Zeitspannen:</strong> ${zeitText}</p>
     </div>
   `;
 
-  // Leiste aufklappen
   if (archivSidebar.offsetHeight <= MIN_H + 5) {
     archivSidebar.style.height = '40vh';
     archivToggle.textContent = '▼';
   }
 }
+
+renderThemenBar();
+updateArchiv();
 </script>
 </body>
 </html>
