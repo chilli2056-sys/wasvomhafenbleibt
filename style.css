@@ -31,92 +31,103 @@ nav a {
   top: 60px;
   left: 0;
   right: 0;
-  height: calc(100vh - 60px - 40px - 48px); /* unter header, über sidebar-bar, über footer */
+  height: calc(100vh - 60px - 40px - 48px);
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* SIDEBAR als transparente Bottom-Bar */
-#sidebar {
+/* SIDEBAR / INFOFENSTER */
+#sidebar,
+#archiv-sidebar {
   position: fixed;
-  bottom: 40px;
   left: 0;
   right: 0;
   height: 48px;
   background: transparent;
-  border: none;
+  border: 1px solid black;
   overflow: hidden;
   z-index: 999;
-  /* kein transition – freies Ziehen */
 }
 
-/* RESIZE HANDLE / TOGGLE BUTTON */
-#resize-handle {
+#sidebar {
+  bottom: 96px;
+}
+
+#archiv-sidebar {
+  bottom: 96px;
+}
+
+/* HANDLE */
+#resize-handle,
+#archiv-handle {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
   height: 48px;
   cursor: ns-resize;
   user-select: none;
   touch-action: none;
+  border-bottom: 1px solid black;
+  background: transparent;
 }
 
-#resize-handle span {
+#resize-handle span,
+#archiv-handle span {
   font-weight: 600;
   font-size: 14px;
-  background: white;
+  background: transparent;
   color: black;
-  padding: 2px 8px;
-  border: 1px solid black;
+  padding: 0;
+  border: none;
 }
 
-#toggle-icon {
+#toggle-icon,
+#archiv-toggle {
   font-size: 18px;
   line-height: 1;
-  background: white;
+  background: transparent;
   color: black;
-  padding: 2px 8px;
-  border: 1px solid black;
+  padding: 0;
+  border: none;
 }
 
 /* SIDEBAR INHALT */
-#sidebar-inner {
+#sidebar-inner,
+#archiv-sidebar-inner {
   padding: 15px 20px;
   overflow-y: auto;
   height: calc(100% - 48px);
   background: transparent;
 }
 
-/* CARDS – nur Text hinterlegt */
+/* CARDS */
 .card {
-  padding: 12px 0;
-  margin-bottom: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid black;
+  background: transparent;
 }
 
 .card h3 {
-  margin: 0 0 4px 0;
-  display: inline-block;
-  background: white;
+  margin: 0 0 8px 0;
+  display: block;
   color: black;
-  padding: 2px 6px;
 }
 
 .card p {
-  margin: 4px 0 0 0;
-  display: inline-block;
-  background: white;
+  margin: 6px 0 0 0;
+  display: block;
   color: black;
-  padding: 2px 6px;
 }
 
 .close {
   float: right;
   cursor: pointer;
-  background: white;
   color: black;
-  padding: 2px 6px;
-  border: 1px solid black;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 /* FOOTER */
@@ -126,17 +137,61 @@ footer {
   width: 100%;
   height: 40px;
   border-top: 1px solid black;
-  background: white;
+  background: transparent;
   display: flex;
   align-items: center;
   padding: 0 30px;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 .footer-content {
   display: flex;
   justify-content: space-between;
   width: 100%;
+}
+
+/* THEMENLEISTEN */
+#themen-bar,
+#map-themen-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 40px;
+  min-height: 56px;
+  background: transparent;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  padding: 8px 12px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+#themen-bar::-webkit-scrollbar,
+#map-themen-bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.themen-chip {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid black;
+  background: transparent;
+  color: black;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.themen-chip.active {
+  background: black;
+  color: white;
 }
 
 /* Leaflet kantig */
@@ -154,19 +209,15 @@ footer {
   background: none !important;
 }
 
-/* ===================== FOTO-MARKER ===================== */
-
+/* FOTO-MARKER */
 .foto-marker {
   position: relative;
   cursor: pointer;
-  /* Breite/Höhe wird per JS gesetzt passend zum Bildformat */
 }
 
-/* Kleines Vorschaubild (Normalzustand) */
 .foto-marker-thumb {
   overflow: hidden;
   background: #eee;
-  /* kein border, keine outline */
 }
 
 .foto-marker-thumb img {
@@ -176,20 +227,19 @@ footer {
   display: block;
 }
 
-/* Aufgeklappter Zustand beim Hover */
 .foto-marker-expanded {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%) scaleY(0);
   transform-origin: bottom center;
-  /* Breite wird per JS passend zum Bildformat gesetzt */
   background: white;
   overflow: visible;
   opacity: 0;
   transition: transform 0.25s ease, opacity 0.2s ease;
   pointer-events: none;
   z-index: 500;
+  border: 1px solid black;
 }
 
 .foto-marker:hover .foto-marker-expanded {
@@ -199,7 +249,6 @@ footer {
 
 .foto-marker-expanded img {
   display: block;
-  /* Breite & Höhe werden per JS gesetzt – ganzes Bild sichtbar */
 }
 
 .foto-marker-label {
@@ -209,9 +258,10 @@ footer {
   line-height: 1.3;
   background: white;
   color: black;
+  border-top: 1px solid black;
 }
 
-/* Platzhalter wenn kein Foto vorhanden */
+/* Platzhalter */
 .foto-placeholder {
   width: 44px;
   height: 44px;
@@ -220,6 +270,7 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 3px;
+  border: 1px solid black;
 }
 
 .foto-placeholder span {
@@ -242,7 +293,6 @@ footer {
   padding: 8px;
 }
 
-/* Foto in der Sidebar-Card */
 .card-foto-placeholder {
   width: 100%;
   height: 140px;
@@ -251,6 +301,7 @@ footer {
   align-items: center;
   justify-content: center;
   margin: 8px 0;
+  border: 1px solid black;
 }
 
 .card-foto-placeholder span {
@@ -259,12 +310,21 @@ footer {
   font-family: "Inter", Helvetica, Arial, sans-serif;
 }
 
-/* ===================== ARCHIV-SEITE ===================== */
+.card-foto {
+  max-height: 35vh;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin: 8px 0;
+  object-fit: contain;
+  border: 1px solid black;
+}
 
+/* ARCHIV */
 #archiv-grid {
   position: fixed;
   top: 60px;
-  bottom: 40px;
+  bottom: 96px;
   left: 0;
   right: 0;
   padding: 20px;
@@ -275,12 +335,12 @@ footer {
   gap: 16px;
 }
 
-/* Kacheln – zwei passen nebeneinander */
 .kachel {
   width: calc(50% - 8px);
   cursor: pointer;
   animation: sway 3s ease-in-out infinite;
   transform-origin: top center;
+  background: transparent;
 }
 
 .kachel:nth-child(even) {
@@ -297,15 +357,18 @@ footer {
   width: 100%;
   height: auto;
   display: block;
+  border: 1px solid black;
+  background: transparent;
 }
 
 .kachel-placeholder {
   width: 100%;
   aspect-ratio: 3/4;
-  background: #e0e0e0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid black;
 }
 
 .kachel-placeholder span {
@@ -316,68 +379,37 @@ footer {
 }
 
 .kachel-label {
-  background: white;
+  background: transparent;
   color: black;
   font-size: 12px;
   padding: 4px 6px;
   margin-top: 4px;
   display: inline-block;
-}
-
-/* Archiv Detail-Leiste (wie Sidebar auf Kartenseite) */
-#archiv-sidebar {
-  position: fixed;
-  bottom: 40px;
-  left: 0;
-  right: 0;
-  height: 48px;
-  background: transparent;
-  border: none;
-  overflow: hidden;
-  z-index: 999;
-}
-
-#archiv-handle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 48px;
-  cursor: ns-resize;
-  user-select: none;
-  touch-action: none;
-}
-
-#archiv-handle span {
-  font-weight: 600;
-  font-size: 14px;
-  background: white;
-  color: black;
-  padding: 2px 8px;
   border: 1px solid black;
 }
 
-#archiv-toggle {
-  font-size: 18px;
-  background: white;
-  color: black;
-  padding: 2px 8px;
-  border: 1px solid black;
-}
+@media (max-width: 700px) {
+  #map {
+    height: calc(100vh - 60px - 56px - 40px - 48px);
+  }
 
-#archiv-sidebar-inner {
-  padding: 15px 20px;
-  overflow-y: auto;
-  height: calc(100% - 48px);
-  background: transparent;
-}
+  #sidebar,
+  #archiv-sidebar {
+    bottom: 108px;
+  }
 
-/* Foto in Sidebar-Card – max 35vh hoch, kein Abschneiden */
-.card-foto {
-  max-height: 35vh;
-  width: auto;
-  max-width: 100%;
-  display: block;
-  margin: 8px 0;
-  object-fit: contain;
+  #themen-bar,
+  #map-themen-bar {
+    padding: 8px 10px;
+  }
+
+  .themen-chip {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  #archiv-grid {
+    bottom: 108px;
+    padding: 14px;
+  }
 }
