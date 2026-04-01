@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bremen Route</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
@@ -23,12 +24,20 @@
 
 <div id="sidebar">
   <div id="resize-handle">
-    <span>Archiv</span>
+    <span>Informationen</span>
     <span id="toggle-icon">▲</span>
   </div>
   <div id="sidebar-inner">
     <div id="content"></div>
   </div>
+</div>
+
+<!-- THEMENLEISTE -->
+<div id="map-themen-bar">
+  <button class="themen-chip" data-route="true">Fahrradroute</button>
+  <button class="themen-chip" data-thema="nationalsozialismus">Nationalsozialismus</button>
+  <button class="themen-chip" data-thema="kolonialismus">Kolonialismus</button>
+  <button class="themen-chip" data-thema="industrie">Industrie</button>
 </div>
 
 <footer>
@@ -42,5 +51,6 @@
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script src="stations.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
