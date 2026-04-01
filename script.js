@@ -2,9 +2,10 @@ const map = L.map('map', {
   doubleClickZoom: false
 }).setView([53.09, 8.78], 14);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap-Mitwirkende'
+}).addTo(map);
 
-// 🧭 Route direkt aus Komoot-GPX (gesampelt)
 const routePoints = [
   [53.07311,8.806255],[53.074871,8.803839],[53.076732,8.80135],[53.078793,8.797563],
   [53.080423,8.792598],[53.081369,8.789036],[53.082213,8.782293],[53.08251,8.780861],
@@ -21,9 +22,66 @@ const routePoints = [
   [53.113935,8.748128],[53.113456,8.745779],[53.114351,8.743977],[53.113952,8.743308]
 ];
 
-// Foto-Marker erstellen – Größe passend zum Bildformat
-stations.forEach(station => {
+const filters = {
+  selectedThemen: [],
+  showFahrradroute: false
+};
 
+const markerObjects = [];
+
+const routingControl = L.Routing.control({
+  waypoints: routePoints.map(point => L.latLng(point)),
+  router: L.Routing.osrmv1({
+    serviceUrl: "https://routing.openstreetmap.de/routed-bike/route/v1"
+  }),
+  lineOptions: {
+    styles: [{ color: 'black', weight: 4 }]
+  },
+  addWaypoints: false,
+  draggableWaypoints: false,
+  fitSelectedRoutes: false,
+  show: false,
+  createMarker: () => null
+});
+
+function setupThemenBar() {
+  const chips = document.querySelectorAll('#map-themen-bar .themen-chip');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.dataset.route === 'true') {
+        filters.showFahrradroute = !filters.showFahrradroute;
+        chip.classList.toggle('active');
+      } else {
+        const thema = chip.dataset.thema;
+        const index = filters.selectedThemen.indexOf(thema);
+
+        if (index > -1) {
+          filters.selectedThemen.splice(index, 1);
+          chip.classList.remove('active');
+        } else {
+          filters.selectedThemen.push(thema);
+          chip.classList.add('active');
+        }
+      }
+
+      updateMap();
+    });
+  });
+}
+
+function filterStations(allStations) {
+  if (filters.selectedThemen.length === 0) {
+    return allStations;
+  }
+
+  return allStations.filter(station => {
+    const stationThemen = station.themen || [];
+    return filters.selectedThemen.some(thema => stationThemen.includes(thema));
+  });
+}
+
+function createMarkerForStation(station) {
   function createMarker(w, h, expW, expH) {
     const markerHtml = `
       <div class="foto-marker" style="width:${w}px;height:${h}px;">
@@ -38,67 +96,91 @@ stations.forEach(station => {
             : `<div class="foto-placeholder large"><span>${station.name}</span></div>`}
           <div class="foto-marker-label">${station.name}</div>
         </div>
-      </div>`;
+      </div>
+    `;
 
     const icon = L.divIcon({
       html: markerHtml,
       className: '',
       iconSize: [w, h],
-      iconAnchor: [w/2, h/2],
-      popupAnchor: [0, -(h/2+6)]
+      iconAnchor: [w / 2, h / 2]
     });
-    return L.marker(station.coords, { icon }).addTo(map);
-  }
 
-  let marker;
+    return L.marker(station.coords, { icon });
+  }
 
   if (station.foto) {
     const img = new Image();
+
     img.onload = () => {
       const THUMB_W = 60;
       const ratio = img.naturalHeight / img.naturalWidth;
       const THUMB_H = Math.round(THUMB_W * ratio);
       const EXP_W = 180;
       const EXP_H = Math.round(EXP_W * ratio);
-      marker = createMarker(THUMB_W, THUMB_H, EXP_W, EXP_H);
+
+      const marker = createMarker(THUMB_W, THUMB_H, EXP_W, EXP_H);
       attachEvents(marker, station);
+      marker.addTo(map);
+      markerObjects.push({ station, marker });
+      updateMap();
     };
+
     img.src = station.foto;
   } else {
-    marker = createMarker(44, 44, 180, 180);
+    const marker = createMarker(44, 44, 180, 180);
     attachEvents(marker, station);
+    marker.addTo(map);
+    markerObjects.push({ station, marker });
   }
-});
+}
 
 function attachEvents(marker, station) {
-  marker.on('dblclick', (e) => {
+  marker.on('click', e => {
     L.DomEvent.stopPropagation(e);
     addCard(station);
   });
-
-  let pressTimer = null, moved = false;
-  marker.on('touchstart', () => { moved=false; pressTimer=setTimeout(()=>{ if(!moved) addCard(station); },600); });
-  marker.on('touchmove',  () => { moved=true; clearTimeout(pressTimer); });
-  marker.on('touchend touchcancel', () => clearTimeout(pressTimer));
 }
 
-// Routing (Fahrrad)
-L.Routing.control({
-  waypoints: routePoints.map(p => L.latLng(p)),
-  router: L.Routing.osrmv1({ serviceUrl:"https://routing.openstreetmap.de/routed-bike/route/v1" }),
-  lineOptions: { styles:[{ color:'black', weight:4 }] },
-  addWaypoints: false,
-  draggableWaypoints: false,
-  createMarker: () => null
-}).addTo(map);
+stations.forEach(station => createMarkerForStation(station));
 
-// Sidebar Cards
+function updateMap() {
+  const filtered = filterStations(stations);
+
+  markerObjects.forEach(obj => {
+    const visible = filtered.some(s => s.id === obj.station.id);
+
+    if (visible) {
+      if (!map.hasLayer(obj.marker)) {
+        obj.marker.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(obj.marker)) {
+        map.removeLayer(obj.marker);
+      }
+    }
+  });
+
+  if (filters.showFahrradroute) {
+    if (!map.hasLayer(routingControl)) {
+      routingControl.addTo(map);
+    }
+  } else {
+    if (map.hasLayer(routingControl)) {
+      map.removeLayer(routingControl);
+    }
+  }
+}
+
 function addCard(station) {
   const container = document.getElementById("content");
   const card = document.createElement("div");
   card.className = "card";
 
-  // Foto auf max 35% der Bildschirmhöhe begrenzen
+  const themenText = station.themen ? station.themen.join(', ') : '';
+  const routenText = station.routen ? station.routen.join(', ') : '';
+  const zeitText = station.zeitspannen ? station.zeitspannen.join(', ') : '';
+
   const fotoHtml = station.foto
     ? `<img src="${station.foto}" alt="${station.name}" class="card-foto" />`
     : `<div class="card-foto-placeholder"><span>${station.name}</span></div>`;
@@ -108,11 +190,14 @@ function addCard(station) {
     <h3>${station.name}</h3>
     ${fotoHtml}
     <p>${station.info}</p>
+    <p><strong>Themen:</strong> ${themenText}</p>
+    <p><strong>Routen:</strong> ${routenText}</p>
+    <p><strong>Zeitspannen:</strong> ${zeitText}</p>
   `;
+
   card.querySelector(".close").onclick = () => card.remove();
   container.prepend(card);
 
-  // Leicht aufklappen (25vh) wenn noch geschlossen
   const isMin = sidebar.offsetHeight <= MIN_HEIGHT + 5;
   if (isMin) {
     sidebar.style.height = '25vh';
@@ -121,45 +206,66 @@ function addCard(station) {
   }
 }
 
-// SIDEBAR – frei ziehbar
-const sidebar     = document.getElementById("sidebar");
-const handle      = document.getElementById("resize-handle");
-const toggleIcon  = document.getElementById("toggle-icon");
+const sidebar = document.getElementById("sidebar");
+const handle = document.getElementById("resize-handle");
+const toggleIcon = document.getElementById("toggle-icon");
 
 const MIN_HEIGHT = 48;
-const MAX_HEIGHT = () => window.innerHeight - 60 - 40;
+const MAX_HEIGHT = () => window.innerHeight - 60 - 56 - 40;
 
-let isDragging=false, startY=0, startHeight=0;
-function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+let isDragging = false;
+let startY = 0;
+let startHeight = 0;
 
-function startDrag(e) { isDragging=true; startY=getClientY(e); startHeight=sidebar.offsetHeight; document.body.style.userSelect="none"; }
+function getClientY(e) {
+  return e.touches ? e.touches[0].clientY : e.clientY;
+}
+
+function startDrag(e) {
+  isDragging = true;
+  startY = getClientY(e);
+  startHeight = sidebar.offsetHeight;
+  document.body.style.userSelect = "none";
+}
+
 function onDrag(e) {
-  if(!isDragging) return;
+  if (!isDragging) return;
+
   let h = startHeight + (startY - getClientY(e));
   h = Math.max(MIN_HEIGHT, Math.min(h, MAX_HEIGHT()));
-  sidebar.style.height = h+'px';
+  sidebar.style.height = h + 'px';
   toggleIcon.textContent = h > MIN_HEIGHT ? '▼' : '▲';
   map.invalidateSize();
 }
+
 function stopDrag() {
-  if(!isDragging) return;
-  isDragging=false;
-  document.body.style.userSelect="";
-  if(sidebar.offsetHeight < MIN_HEIGHT+20) { sidebar.style.height=MIN_HEIGHT+'px'; toggleIcon.textContent='▲'; }
+  if (!isDragging) return;
+
+  isDragging = false;
+  document.body.style.userSelect = "";
+
+  if (sidebar.offsetHeight < MIN_HEIGHT + 20) {
+    sidebar.style.height = MIN_HEIGHT + 'px';
+    toggleIcon.textContent = '▲';
+  }
+
   map.invalidateSize();
 }
 
 handle.addEventListener("mousedown", startDrag);
-handle.addEventListener("touchstart", startDrag, {passive:true});
+handle.addEventListener("touchstart", startDrag, { passive: true });
 document.addEventListener("mousemove", onDrag);
-document.addEventListener("touchmove", onDrag, {passive:true});
+document.addEventListener("touchmove", onDrag, { passive: true });
 document.addEventListener("mouseup", stopDrag);
 document.addEventListener("touchend", stopDrag);
 
 toggleIcon.addEventListener("click", e => {
   e.stopPropagation();
-  const isMin = sidebar.offsetHeight <= MIN_HEIGHT+5;
-  sidebar.style.height = isMin ? '40vh' : MIN_HEIGHT+'px';
+  const isMin = sidebar.offsetHeight <= MIN_HEIGHT + 5;
+  sidebar.style.height = isMin ? '40vh' : MIN_HEIGHT + 'px';
   toggleIcon.textContent = isMin ? '▼' : '▲';
   map.invalidateSize();
 });
+
+setupThemenBar();
+updateMap();
