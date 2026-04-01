@@ -1,0 +1,383 @@
+* {
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid black;
+  padding: 15px 30px;
+  z-index: 1000;
+}
+
+nav a {
+  margin-right: 30px;
+  text-decoration: none;
+  color: black;
+}
+
+/* MAP */
+#map {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  height: calc(100vh - 60px - 40px - 48px); /* unter header, über sidebar-bar, über footer */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* SIDEBAR als transparente Bottom-Bar */
+#sidebar {
+  position: fixed;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  z-index: 999;
+  /* kein transition – freies Ziehen */
+}
+
+/* RESIZE HANDLE / TOGGLE BUTTON */
+#resize-handle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 48px;
+  cursor: ns-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+#resize-handle span {
+  font-weight: 600;
+  font-size: 14px;
+  background: white;
+  color: black;
+  padding: 2px 8px;
+  border: 1px solid black;
+}
+
+#toggle-icon {
+  font-size: 18px;
+  line-height: 1;
+  background: white;
+  color: black;
+  padding: 2px 8px;
+  border: 1px solid black;
+}
+
+/* SIDEBAR INHALT */
+#sidebar-inner {
+  padding: 15px 20px;
+  overflow-y: auto;
+  height: calc(100% - 48px);
+  background: transparent;
+}
+
+/* CARDS – nur Text hinterlegt */
+.card {
+  padding: 12px 0;
+  margin-bottom: 8px;
+}
+
+.card h3 {
+  margin: 0 0 4px 0;
+  display: inline-block;
+  background: white;
+  color: black;
+  padding: 2px 6px;
+}
+
+.card p {
+  margin: 4px 0 0 0;
+  display: inline-block;
+  background: white;
+  color: black;
+  padding: 2px 6px;
+}
+
+.close {
+  float: right;
+  cursor: pointer;
+  background: white;
+  color: black;
+  padding: 2px 6px;
+  border: 1px solid black;
+}
+
+/* FOOTER */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  border-top: 1px solid black;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  z-index: 1000;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Leaflet kantig */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border-radius: 0 !important;
+}
+
+/* Keine Outline/Shadow bei Markern */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* ===================== FOTO-MARKER ===================== */
+
+.foto-marker {
+  position: relative;
+  cursor: pointer;
+  /* Breite/Höhe wird per JS gesetzt passend zum Bildformat */
+}
+
+/* Kleines Vorschaubild (Normalzustand) */
+.foto-marker-thumb {
+  overflow: hidden;
+  background: #eee;
+  /* kein border, keine outline */
+}
+
+.foto-marker-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Aufgeklappter Zustand beim Hover */
+.foto-marker-expanded {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: bottom center;
+  /* Breite wird per JS passend zum Bildformat gesetzt */
+  background: white;
+  overflow: visible;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.foto-marker:hover .foto-marker-expanded {
+  transform: translateX(-50%) scaleY(1);
+  opacity: 1;
+}
+
+.foto-marker-expanded img {
+  display: block;
+  /* Breite & Höhe werden per JS gesetzt – ganzes Bild sichtbar */
+}
+
+.foto-marker-label {
+  padding: 5px 8px;
+  font-size: 11px;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
+  line-height: 1.3;
+  background: white;
+  color: black;
+}
+
+/* Platzhalter wenn kein Foto vorhanden */
+.foto-placeholder {
+  width: 44px;
+  height: 44px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+}
+
+.foto-placeholder span {
+  font-size: 7px;
+  text-align: center;
+  line-height: 1.2;
+  color: #333;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.foto-placeholder.large {
+  width: 200px;
+  height: 130px;
+  background: #e8e8e8;
+}
+
+.foto-placeholder.large span {
+  font-size: 12px;
+  padding: 8px;
+}
+
+/* Foto in der Sidebar-Card */
+.card-foto-placeholder {
+  width: 100%;
+  height: 140px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.card-foto-placeholder span {
+  font-size: 13px;
+  color: #555;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
+}
+
+/* ===================== ARCHIV-SEITE ===================== */
+
+#archiv-grid {
+  position: fixed;
+  top: 60px;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 16px;
+}
+
+/* Kacheln – zwei passen nebeneinander */
+.kachel {
+  width: calc(50% - 8px);
+  cursor: pointer;
+  animation: sway 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.kachel:nth-child(even) {
+  animation-delay: -1.5s;
+}
+
+@keyframes sway {
+  0%   { transform: rotate(-1deg); }
+  50%  { transform: rotate(1deg); }
+  100% { transform: rotate(-1deg); }
+}
+
+.kachel img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.kachel-placeholder {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kachel-placeholder span {
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+  padding: 10px;
+}
+
+.kachel-label {
+  background: white;
+  color: black;
+  font-size: 12px;
+  padding: 4px 6px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+/* Archiv Detail-Leiste (wie Sidebar auf Kartenseite) */
+#archiv-sidebar {
+  position: fixed;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  z-index: 999;
+}
+
+#archiv-handle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 48px;
+  cursor: ns-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+#archiv-handle span {
+  font-weight: 600;
+  font-size: 14px;
+  background: white;
+  color: black;
+  padding: 2px 8px;
+  border: 1px solid black;
+}
+
+#archiv-toggle {
+  font-size: 18px;
+  background: white;
+  color: black;
+  padding: 2px 8px;
+  border: 1px solid black;
+}
+
+#archiv-sidebar-inner {
+  padding: 15px 20px;
+  overflow-y: auto;
+  height: calc(100% - 48px);
+  background: transparent;
+}
+
+/* Foto in Sidebar-Card – max 35vh hoch, kein Abschneiden */
+.card-foto {
+  max-height: 35vh;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin: 8px 0;
+  object-fit: contain;
+}

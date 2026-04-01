@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archiv</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Karte</a>
+    <a href="#">Archiv</a>
+    <a href="kaffeekranz.html">Kaffeekranz</a>
+  </nav>
+</header>
+
+<!-- Kachel-Grid -->
+<div id="archiv-grid"></div>
+
+<!-- Detail-Leiste unten (wie Sidebar auf Kartenseite) -->
+<div id="archiv-sidebar">
+  <div id="archiv-handle">
+    <span>Details</span>
+    <span id="archiv-toggle">▲</span>
+  </div>
+  <div id="archiv-sidebar-inner">
+    <div id="archiv-content"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <span>Bremen Projekt</span>
+    <span>2026</span>
+  </div>
+</footer>
+
+<script src="stations.js"></script>
+<script>
+// Kacheln rendern
+const grid = document.getElementById('archiv-grid');
+
+stations.forEach(station => {
+  const kachel = document.createElement('div');
+  kachel.className = 'kachel';
+
+  const fotoHtml = station.foto
+    ? `<img src="${station.foto}" alt="${station.name}" />`
+    : `<div class="kachel-placeholder"><span>${station.name}</span></div>`;
+
+  kachel.innerHTML = `
+    ${fotoHtml}
+    <div class="kachel-label">${station.name}</div>
+  `;
+
+  // Doppelklick → Detail-Leiste
+  kachel.addEventListener('dblclick', () => openDetail(station));
+
+  // Touch Long-Press
+  let pressTimer = null;
+  let moved = false;
+  kachel.addEventListener('touchstart', () => {
+    moved = false;
+    pressTimer = setTimeout(() => { if (!moved) openDetail(station); }, 600);
+  });
+  kachel.addEventListener('touchmove', () => { moved = true; clearTimeout(pressTimer); });
+  kachel.addEventListener('touchend', () => clearTimeout(pressTimer));
+
+  grid.appendChild(kachel);
+});
+
+// Detail-Leiste
+const archivSidebar = document.getElementById('archiv-sidebar');
+const archivHandle  = document.getElementById('archiv-handle');
+const archivToggle  = document.getElementById('archiv-toggle');
+const archivContent = document.getElementById('archiv-content');
+
+const MIN_H = 48;
+const MAX_H = () => window.innerHeight - 60 - 40;
+
+let dragging = false, startY = 0, startH = 0;
+
+function getY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+
+archivHandle.addEventListener('mousedown',  e => { dragging=true; startY=getY(e); startH=archivSidebar.offsetHeight; document.body.style.userSelect='none'; });
+archivHandle.addEventListener('touchstart', e => { dragging=true; startY=getY(e); startH=archivSidebar.offsetHeight; }, {passive:true});
+
+document.addEventListener('mousemove',  e => { if(!dragging) return; let h=startH+(startY-getY(e)); h=Math.max(MIN_H,Math.min(h,MAX_H())); archivSidebar.style.height=h+'px'; archivToggle.textContent=h>MIN_H?'▼':'▲'; });
+document.addEventListener('touchmove',  e => { if(!dragging) return; let h=startH+(startY-getY(e)); h=Math.max(MIN_H,Math.min(h,MAX_H())); archivSidebar.style.height=h+'px'; archivToggle.textContent=h>MIN_H?'▼':'▲'; }, {passive:true});
+
+document.addEventListener('mouseup',  () => { dragging=false; document.body.style.userSelect=''; snap(); });
+document.addEventListener('touchend', () => { dragging=false; snap(); });
+
+function snap() {
+  if (archivSidebar.offsetHeight < MIN_H + 20) {
+    archivSidebar.style.height = MIN_H + 'px';
+    archivToggle.textContent = '▲';
+  }
+}
+
+archivToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  const isMin = archivSidebar.offsetHeight <= MIN_H + 5;
+  archivSidebar.style.height = isMin ? '40vh' : MIN_H + 'px';
+  archivToggle.textContent = isMin ? '▼' : '▲';
+});
+
+function openDetail(station) {
+  archivContent.innerHTML = '';
+
+  const fotoHtml = station.foto
+    ? `<img src="${station.foto}" alt="${station.name}" style="max-height:35vh;width:auto;display:block;margin:8px 0;" />`
+    : `<div class="card-foto-placeholder"><span>${station.name}</span></div>`;
+
+  archivContent.innerHTML = `
+    <div class="card">
+      <h3>${station.name}</h3>
+      ${fotoHtml}
+      <p>${station.info}</p>
+    </div>
+  `;
+
+  // Leiste aufklappen
+  if (archivSidebar.offsetHeight <= MIN_H + 5) {
+    archivSidebar.style.height = '40vh';
+    archivToggle.textContent = '▼';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bremen Route</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#">Karte</a>
+    <a href="archiv.html">Archiv</a>
+    <a href="kaffeekranz.html">Kaffeekranz</a>
+  </nav>
+</header>
+
+<div id="map"></div>
+
+<div id="sidebar">
+  <div id="resize-handle">
+    <span>Archiv</span>
+    <span id="toggle-icon">▲</span>
+  </div>
+  <div id="sidebar-inner">
+    <div id="content"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <span>Bremen Projekt</span>
+    <span>2026</span>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script src="stations.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
