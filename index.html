@@ -22,6 +22,19 @@
 
 <div id="map"></div>
 
+<div id="nav-menu">
+  <button id="nav-menu-toggle">Navigation ▾</button>
+
+  <div id="nav-menu-panel" class="hidden">
+    <div id="nav-menu-inner">
+      <button id="start-nav">Navigation starten</button>
+      <button id="next-stop" disabled>Weiter</button>
+      <button id="stop-nav">Beenden</button>
+      <div id="nav-status">Navigation aus</div>
+    </div>
+  </div>
+</div>
+
 <div id="sidebar">
   <div id="resize-handle">
     <span>Informationen</span>
@@ -32,7 +45,6 @@
   </div>
 </div>
 
-<!-- THEMENLEISTE -->
 <div id="map-themen-bar">
   <button class="themen-chip" data-route="true">Fahrradroute</button>
   <button class="themen-chip" data-thema="nationalsozialismus">Nationalsozialismus</button>
