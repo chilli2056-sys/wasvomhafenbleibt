@@ -19,7 +19,7 @@ const stations = [
     name: "Ehemalige Kellogg's-Fabrik",
     coords: [53.082816, 8.781034],
     info: "Überseeinsel Bereich.",
-    foto: "fotos/Kelloggs.JPG",
+    foto: "Kelloggs.JPG",
     themen: ["industrie"],
     routen: ["fahrradroute", "einzelort"],
     zeitspannen: ["nachkriegszeit", "gegenwart"]
@@ -39,7 +39,7 @@ const stations = [
     name: "Molenfeuer Überseehafen Süd (Mäuseturm)",
     coords: [53.106128, 8.747815],
     info: "Markanter Turm am Hafeneingang.",
-    foto: "fotos/Molenturm.JPG",
+    foto: "Molenturm.JPG",
     themen: ["kolonialismus", "industrie"],
     routen: ["fahrradroute"],
     zeitspannen: ["1884-1918", "gegenwart"]
@@ -69,7 +69,7 @@ const stations = [
     name: "Altes Hafenbecken (Rolandmühle)",
     coords: [53.097389, 8.773819],
     info: "Historisches Hafenbecken.",
-    foto: "fotos/Hafenbecken.JPG",
+    foto: "Hafenbecken.JPG",
     themen: ["kolonialismus", "industrie"],
     routen: ["fahrradroute"],
     zeitspannen: ["1884-1918", "1933-1945"]
@@ -89,7 +89,7 @@ const stations = [
     name: "Blick auf den Werfthafen Bremen",
     coords: [53.113972, 8.743349],
     info: "Endpunkt mit Blick auf den Werfthafen.",
-    foto: "fotos/Gästehaus.JPG",
+    foto: "Gästehaus.JPG",
     themen: ["industrie"],
     routen: ["fahrradroute"],
     zeitspannen: ["gegenwart"]
