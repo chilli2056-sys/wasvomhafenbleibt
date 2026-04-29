@@ -28,6 +28,9 @@ const route20Stations = stations.filter(station =>
 // ============================================================
 // THEMEN- UND ROUTENLEISTE
 // ============================================================
+
+
+
 function setupThemenBar() {
   const chips = document.querySelectorAll('#map-themen-bar .themen-chip');
 
@@ -131,11 +134,25 @@ function show20kmRoute() {
 // MARKER
 // ============================================================
 function createMarkerForStation(station) {
-  const markerHtml = `
-  <div class="container-marker" title="${station.name}">
+  const zoom = map.getZoom();
+const MARKER_SIZE = Math.max(35, 80 - zoom * 2);
+
+const markerHtml = `
+  <div class="container-marker" title="${station.name}" style="width:${MARKER_SIZE}px;height:${MARKER_SIZE}px;">
     <svg viewBox="0 0 40 40">
       <!-- Container -->
-      <rect x="2" y="2" width="36" height="36" fill="#2f5f8f" stroke="black" stroke-width="2"/>
+      <defs>
+  <clipPath id="containerClip-${station.id}">
+    <rect x="2" y="2" width="36" height="36"/>
+  </clipPath>
+</defs>
+
+${station.foto
+  ? `<image href="${station.foto}" x="2" y="2" width="50" height="36" preserveAspectRatio="xMidYMid slice" clip-path="url(#containerClip-${station.id})" />`
+  : `<rect x="2" y="2" width="36" height="36" fill="#2f5f8f" />`
+}
+
+<rect x="2" y="2" width="36" height="36" fill="none" stroke="black" stroke-width="2"/>
       
       <!-- Zwei Türlinien -->
       <line x1="18" y1="2" x2="18" y2="38" stroke="black" stroke-width="2"/>
@@ -145,11 +162,11 @@ function createMarkerForStation(station) {
 `;
 
   const icon = L.divIcon({
-    html: markerHtml,
-    className: '',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9]
-  });
+  html: markerHtml,
+  className: '',
+  iconSize: [MARKER_SIZE, MARKER_SIZE],
+  iconAnchor: [MARKER_SIZE / 2, MARKER_SIZE / 2]
+});
 
   const marker = L.marker(station.coords, { icon });
 
@@ -164,6 +181,7 @@ function attachEvents(marker, station) {
     addCard(station);
   });
 }
+
 
 stations.forEach(station => createMarkerForStation(station));
 
@@ -291,4 +309,3 @@ toggleIcon.addEventListener('click', e => {
 // ============================================================
 setupThemenBar();
 updateMap();
-
