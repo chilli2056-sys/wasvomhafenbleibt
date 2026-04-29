@@ -5,7 +5,7 @@
 
 @font-face {
   font-family: 'Heming';
-  src: url('Heming-Variable.woff2') format('woff2');
+  src: url('fonts/Heming-Variable.woff2') format('woff2');
   font-weight: 100 900; /* weil Variable Font */
   font-style: normal;
 }
@@ -511,10 +511,10 @@ footer {
 }
 
 .container-marker {
-  width: 30px;
-  height: 20px;
+  width: var(--marker-size, 45px);
+  height: var(--marker-size, 60px);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: width 0.2s ease, height 0.2s ease, transform 0.15s ease;
 }
 
 .container-marker svg {
@@ -524,7 +524,7 @@ footer {
 }
 
 .container-marker:hover {
-  transform: scale(1.4);
+  transform: scale(1.25);
 }
 @media (max-width: 700px) {
   #map {
