@@ -1,53 +1,88 @@
 const map = L.map('map', {
-  doubleClickZoom: false
+  doubleClickZoom: false,
+  maxZoom: 20
 }).setView([53.09, 8.78], 14);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap-Mitwirkende'
-}).addTo(map);
+L.tileLayer(
+  'https://api.maptiler.com/maps/backdrop-v4/256/{z}/{x}/{y}.png?key=H1MLT1MJibg2qwOzZ5h4',
+  {
+    attribution: '&copy; OpenStreetMap contributors &copy; MapTiler',
+    tileSize: 256,
+    maxZoom: 20,
+    maxNativeZoom: 20
+  }
+).addTo(map);
 
 const filters = {
   selectedThemen: [],
-  showFahrradroute: false
+  selectedRoute: null
 };
 
 const markerObjects = [];
+let routeLayer = null;
 
-const routeStations = stations.filter(station =>
+const route20Stations = stations.filter(station =>
   (station.routen || []).includes('fahrradroute')
 );
 
 // ============================================================
-// THEMENLEISTE
+// THEMEN- UND ROUTENLEISTE
 // ============================================================
 function setupThemenBar() {
   const chips = document.querySelectorAll('#map-themen-bar .themen-chip');
 
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
-      if (chip.dataset.route === 'true') {
-        filters.showFahrradroute = !filters.showFahrradroute;
-        chip.classList.toggle('active');
+      const route = chip.dataset.route;
+      const thema = chip.dataset.thema;
 
-        if (!filters.showFahrradroute) {
-          stopNavigation();
-        }
-      } else {
-        const thema = chip.dataset.thema;
-        const index = filters.selectedThemen.indexOf(thema);
+      if (route) {
+        handleRouteClick(route, chip);
+      }
 
-        if (index > -1) {
-          filters.selectedThemen.splice(index, 1);
-          chip.classList.remove('active');
-        } else {
-          filters.selectedThemen.push(thema);
-          chip.classList.add('active');
-        }
+      if (thema) {
+        handleThemaClick(thema, chip);
       }
 
       updateMap();
     });
   });
+}
+
+function handleRouteClick(route, clickedChip) {
+  const routeChips = document.querySelectorAll('#map-themen-bar .themen-chip[data-route]');
+
+  if (filters.selectedRoute === route) {
+    filters.selectedRoute = null;
+    clickedChip.classList.remove('active');
+    clearRoute();
+    return;
+  }
+
+  filters.selectedRoute = route;
+
+  routeChips.forEach(chip => chip.classList.remove('active'));
+  clickedChip.classList.add('active');
+
+  if (route === '20') {
+    show20kmRoute();
+  }
+
+  if (route === '10') {
+    clearRoute();
+  }
+}
+
+function handleThemaClick(thema, chip) {
+  const index = filters.selectedThemen.indexOf(thema);
+
+  if (index > -1) {
+    filters.selectedThemen.splice(index, 1);
+    chip.classList.remove('active');
+  } else {
+    filters.selectedThemen.push(thema);
+    chip.classList.add('active');
+  }
 }
 
 function filterStations(allStations) {
@@ -62,60 +97,65 @@ function filterStations(allStations) {
 }
 
 // ============================================================
+// ROUTEN
+// ============================================================
+function clearRoute() {
+  if (routeLayer) {
+    map.removeLayer(routeLayer);
+    routeLayer = null;
+  }
+}
+
+function show20kmRoute() {
+  clearRoute();
+
+  const routePoints = route20Stations
+    .map(station => station.coords)
+    .filter(Boolean);
+
+  if (routePoints.length < 2) {
+    return;
+  }
+
+  routeLayer = L.polyline(routePoints, {
+    color: 'black',
+    weight: 4,
+    opacity: 1
+  }).addTo(map);
+
+  map.fitBounds(routeLayer.getBounds(), {
+    padding: [30, 30]
+  });
+}
+
 // MARKER
 // ============================================================
 function createMarkerForStation(station) {
-  function createMarker(w, h, expW, expH) {
-    const markerHtml = `
-      <div class="foto-marker" data-station-id="${station.id}" style="width:${w}px;height:${h}px;">
-        <div class="foto-marker-thumb" style="width:${w}px;height:${h}px;">
-          ${station.foto
-            ? `<img src="${station.foto}" alt="${station.name}" style="width:${w}px;height:${h}px;object-fit:cover;" />`
-            : `<div class="foto-placeholder"><span>${station.name}</span></div>`}
-        </div>
-        <div class="foto-marker-expanded" style="width:${expW}px;">
-          ${station.foto
-            ? `<img src="${station.foto}" alt="${station.name}" style="width:${expW}px;height:${expH}px;object-fit:contain;background:#fff;" />`
-            : `<div class="foto-placeholder large"><span>${station.name}</span></div>`}
-          <div class="foto-marker-label">${station.name}</div>
-        </div>
-      </div>
-    `;
+  const markerHtml = `
+  <div class="container-marker" title="${station.name}">
+    <svg viewBox="0 0 40 40">
+      <!-- Container -->
+      <rect x="2" y="2" width="36" height="36" fill="#2f5f8f" stroke="black" stroke-width="2"/>
+      
+      <!-- Zwei Türlinien -->
+      <line x1="18" y1="2" x2="18" y2="38" stroke="black" stroke-width="2"/>
+      <line x1="22" y1="2" x2="22" y2="38" stroke="black" stroke-width="2"/>
+    </svg>
+  </div>
+`;
 
-    const icon = L.divIcon({
-      html: markerHtml,
-      className: '',
-      iconSize: [w, h],
-      iconAnchor: [w / 2, h / 2]
-    });
+  const icon = L.divIcon({
+    html: markerHtml,
+    className: '',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+  });
 
-    return L.marker(station.coords, { icon });
-  }
+  const marker = L.marker(station.coords, { icon });
 
-  if (station.foto) {
-    const img = new Image();
-
-    img.onload = () => {
-      const THUMB_W = 60;
-      const ratio = img.naturalHeight / img.naturalWidth;
-      const THUMB_H = Math.round(THUMB_W * ratio);
-      const EXP_W = 180;
-      const EXP_H = Math.round(EXP_W * ratio);
-
-      const marker = createMarker(THUMB_W, THUMB_H, EXP_W, EXP_H);
-      attachEvents(marker, station);
-      marker.addTo(map);
-      markerObjects.push({ station, marker });
-      updateMap();
-    };
-
-    img.src = station.foto;
-  } else {
-    const marker = createMarker(44, 44, 180, 180);
-    attachEvents(marker, station);
-    marker.addTo(map);
-    markerObjects.push({ station, marker });
-  }
+  attachEvents(marker, station);
+  marker.addTo(map);
+  markerObjects.push({ station, marker });
 }
 
 function attachEvents(marker, station) {
@@ -143,11 +183,6 @@ function updateMap() {
       }
     }
   });
-
-  if (!filters.showFahrradroute) {
-    clearCurrentRoute();
-    removeCurrentMarkerHighlight();
-  }
 }
 
 // ============================================================
@@ -185,12 +220,6 @@ function addCard(station) {
     toggleIcon.textContent = '▼';
     map.invalidateSize();
   }
-}
-
-function openSingleCard(station) {
-  const container = document.getElementById('content');
-  container.innerHTML = '';
-  addCard(station);
 }
 
 // ============================================================
@@ -258,261 +287,8 @@ toggleIcon.addEventListener('click', e => {
 });
 
 // ============================================================
-// NAV-MENÜ
-// ============================================================
-const navMenuToggle = document.getElementById('nav-menu-toggle');
-const navMenuPanel = document.getElementById('nav-menu-panel');
-
-navMenuToggle.addEventListener('click', () => {
-  navMenuPanel.classList.toggle('hidden');
-  navMenuToggle.textContent = navMenuPanel.classList.contains('hidden')
-    ? 'Navigation ▾'
-    : 'Navigation ▴';
-});
-
-// ============================================================
-// ETAPPEN-NAVIGATION
-// ============================================================
-let activeNav = false;
-let navIndex = 0;
-let watchId = null;
-let userLatLng = null;
-let userMarker = null;
-let currentRouteControl = null;
-let lastArrivalStationId = null;
-
-const ARRIVAL_DISTANCE = 35;
-
-const startNavButton = document.getElementById('start-nav');
-const nextStopButton = document.getElementById('next-stop');
-const stopNavButton = document.getElementById('stop-nav');
-const navStatus = document.getElementById('nav-status');
-
-function updateNavStatus(text) {
-  navStatus.textContent = text;
-}
-
-function getDistanceInMeters(a, b) {
-  return map.distance(a, b);
-}
-
-function clearCurrentRoute() {
-  if (currentRouteControl) {
-    map.removeControl(currentRouteControl);
-    currentRouteControl = null;
-  }
-}
-
-function removeCurrentMarkerHighlight() {
-  markerObjects.forEach(obj => {
-    const el = obj.marker.getElement();
-    if (!el) return;
-    const markerRoot = el.querySelector('.foto-marker');
-    if (markerRoot) {
-      markerRoot.classList.remove('foto-marker-current');
-    }
-  });
-}
-
-function highlightCurrentTarget(targetStation) {
-  removeCurrentMarkerHighlight();
-
-  markerObjects.forEach(obj => {
-    if (obj.station.id === targetStation.id) {
-      const el = obj.marker.getElement();
-      if (!el) return;
-      const markerRoot = el.querySelector('.foto-marker');
-      if (markerRoot) {
-        markerRoot.classList.add('foto-marker-current');
-      }
-    }
-  });
-}
-
-function createUserMarker(latlng) {
-  return L.marker(latlng, {
-    icon: L.divIcon({
-      className: '',
-      html: `<div class="user-location-marker"></div>`,
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    })
-  });
-}
-
-function updateUserMarker(lat, lng) {
-  userLatLng = L.latLng(lat, lng);
-
-  if (!userMarker) {
-    userMarker = createUserMarker(userLatLng).addTo(map);
-  } else {
-    userMarker.setLatLng(userLatLng);
-  }
-}
-
-function getCurrentTargetStation() {
-  return routeStations[navIndex] || null;
-}
-
-function drawRouteToCurrentStation() {
-  if (!activeNav) return;
-
-  const target = getCurrentTargetStation();
-  if (!target) return;
-
-  clearCurrentRoute();
-
-  let startPoint;
-
-  if (navIndex === 0) {
-    if (!userLatLng) return;
-    startPoint = userLatLng;
-  } else {
-    const prev = routeStations[navIndex - 1];
-    startPoint = L.latLng(prev.coords[0], prev.coords[1]);
-  }
-
-  const targetLatLng = L.latLng(target.coords[0], target.coords[1]);
-
-  currentRouteControl = L.Routing.control({
-    waypoints: [startPoint, targetLatLng],
-    router: L.Routing.osrmv1({
-      serviceUrl: 'https://routing.openstreetmap.de/routed-bike/route/v1'
-    }),
-    lineOptions: {
-      styles: [{ color: 'black', weight: 4 }]
-    },
-    addWaypoints: false,
-    draggableWaypoints: false,
-    fitSelectedRoutes: true,
-    show: false,
-    createMarker: () => null
-  }).addTo(map);
-
-  highlightCurrentTarget(target);
-}
-
-function checkArrival() {
-  if (!activeNav || !userLatLng) return;
-
-  const target = getCurrentTargetStation();
-  if (!target) return;
-
-  const targetLatLng = L.latLng(target.coords[0], target.coords[1]);
-  const distance = getDistanceInMeters(userLatLng, targetLatLng);
-
-  if (distance <= ARRIVAL_DISTANCE) {
-    nextStopButton.disabled = false;
-    updateNavStatus(`Angekommen: ${target.name}`);
-
-    if (lastArrivalStationId !== target.id) {
-      openSingleCard(target);
-      lastArrivalStationId = target.id;
-    }
-
-    clearCurrentRoute();
-  } else {
-    nextStopButton.disabled = true;
-    updateNavStatus(`${target.name} · ${Math.round(distance)} m entfernt`);
-  }
-}
-
-function startNavigation() {
-  if (!filters.showFahrradroute) {
-    filters.showFahrradroute = true;
-    const routeChip = document.querySelector('#map-themen-bar .themen-chip[data-route="true"]');
-    routeChip?.classList.add('active');
-  }
-
-  if (!navigator.geolocation) {
-    alert('Ortung wird auf diesem Gerät nicht unterstützt.');
-    return;
-  }
-
-  navMenuPanel.classList.remove('hidden');
-  navMenuToggle.textContent = 'Navigation ▴';
-
-  activeNav = true;
-  navIndex = 0;
-  lastArrivalStationId = null;
-  nextStopButton.disabled = true;
-  updateNavStatus('Standort wird gesucht ...');
-
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-  }
-
-  watchId = navigator.geolocation.watchPosition(
-    position => {
-      const { latitude, longitude } = position.coords;
-      updateUserMarker(latitude, longitude);
-
-      const target = getCurrentTargetStation();
-      if (!target) return;
-
-      drawRouteToCurrentStation();
-      checkArrival();
-    },
-    error => {
-      console.error(error);
-      updateNavStatus('Ortung nicht verfügbar');
-      alert('Bitte Standortfreigabe erlauben, damit die Navigation funktioniert.');
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 3000,
-      timeout: 10000
-    }
-  );
-}
-
-function goToNextStation() {
-  if (!activeNav) return;
-
-  navIndex += 1;
-  nextStopButton.disabled = true;
-  lastArrivalStationId = null;
-
-  if (navIndex >= routeStations.length) {
-    updateNavStatus('Route abgeschlossen');
-    clearCurrentRoute();
-    removeCurrentMarkerHighlight();
-    return;
-  }
-
-  drawRouteToCurrentStation();
-  checkArrival();
-}
-
-function stopNavigation() {
-  activeNav = false;
-  navIndex = 0;
-  lastArrivalStationId = null;
-
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-
-  clearCurrentRoute();
-  removeCurrentMarkerHighlight();
-
-  if (userMarker) {
-    map.removeLayer(userMarker);
-    userMarker = null;
-  }
-
-  userLatLng = null;
-  nextStopButton.disabled = true;
-  updateNavStatus('Navigation aus');
-}
-
-startNavButton.addEventListener('click', startNavigation);
-nextStopButton.addEventListener('click', goToNextStation);
-stopNavButton.addEventListener('click', stopNavigation);
-
-// ============================================================
 // START
 // ============================================================
 setupThemenBar();
 updateMap();
+
