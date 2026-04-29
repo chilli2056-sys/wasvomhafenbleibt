@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bremen Route</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.9.0/maptiler-sdk.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,19 +21,6 @@
 
 <div id="map"></div>
 
-<div id="nav-menu">
-  <button id="nav-menu-toggle">Navigation ▾</button>
-
-  <div id="nav-menu-panel" class="hidden">
-    <div id="nav-menu-inner">
-      <button id="start-nav">Navigation starten</button>
-      <button id="next-stop" disabled>Weiter</button>
-      <button id="stop-nav">Beenden</button>
-      <div id="nav-status">Navigation aus</div>
-    </div>
-  </div>
-</div>
-
 <div id="sidebar">
   <div id="resize-handle">
     <span>Informationen</span>
@@ -46,23 +32,22 @@
 </div>
 
 <div id="map-themen-bar">
-  <button class="themen-chip" data-route="true">Fahrradroute</button>
-  <button class="themen-chip" data-thema="nationalsozialismus">Nationalsozialismus</button>
+  <button class="themen-chip" data-route="10">10 km Fahrradtour</button>
+  <button class="themen-chip" data-route="20">20 km Fahrradtour</button>
   <button class="themen-chip" data-thema="kolonialismus">Kolonialismus</button>
+  <button class="themen-chip" data-thema="nationalsozialismus">Nationalsozialismus</button>
   <button class="themen-chip" data-thema="industrie">Industrie</button>
 </div>
 
 <footer>
   <div class="footer-content">
-    <span>Bremen Projekt</span>
+    <span>Was vom Hafen bleibt</span>
     <span>2026</span>
   </div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script src="stations.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
