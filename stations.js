@@ -9,7 +9,7 @@ const stations = [
     name: "Löwenkopf an der Wilhelm-Kaisen-Brücke",
     coords: [53.073124, 8.806198],
     info: "Startpunkt an der Weser.",
-    foto: "fotos/Löwe.JPG",
+    foto: "Löwe.JPG",
     themen: ["kolonialismus"],
     routen: ["fahrradroute"],
     zeitspannen: ["1884-1918"]
