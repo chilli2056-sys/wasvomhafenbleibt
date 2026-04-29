@@ -3,10 +3,19 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: 'Heming';
+  src: url('fonts/Heming-Variable.woff2') format('woff2');
+  font-weight: 100 900; /* weil Variable Font */
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
 }
+
+
 
 /* HEADER */
 header {
@@ -36,7 +45,7 @@ nav a {
   user-select: none;
 }
 
-/* AUSKLAPPBARES NAVIGATIONSMENÜ */
+/* AUSKLAPPBARES NAVIGATIONSMENÃœ */
 #nav-menu {
   position: fixed;
   top: 72px;
@@ -51,7 +60,7 @@ nav a {
   border: 1px solid black;
   background: white;
   color: black;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
   font-size: 13px;
   text-align: left;
   cursor: pointer;
@@ -82,7 +91,7 @@ nav a {
   border: 1px solid black;
   background: white;
   color: black;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
   font-size: 13px;
   text-align: left;
   cursor: pointer;
@@ -258,7 +267,7 @@ footer {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   color: black;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: 1.2;
   cursor: pointer;
@@ -336,7 +345,7 @@ footer {
 .foto-marker-label {
   padding: 5px 8px;
   font-size: 11px;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
   line-height: 1.3;
   background: white;
   color: black;
@@ -376,7 +385,7 @@ footer {
   text-align: center;
   line-height: 1.2;
   color: #333;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
   overflow: hidden;
 }
 
@@ -405,7 +414,7 @@ footer {
 .card-foto-placeholder span {
   font-size: 13px;
   color: #555;
-  font-family: "Inter", Helvetica, Arial, sans-serif;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
 }
 
 .card-foto {
@@ -486,6 +495,37 @@ footer {
   border: 1px solid black;
 }
 
+/* RUNDE ROSTROTE MARKERPUNKTE */
+.punkt-marker {
+  width: 18px;
+  height: 18px;
+  background: #9a3f2f;
+  border: 1px solid black;
+  border-radius: 50% !important;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.punkt-marker:hover {
+  transform: scale(1.35);
+}
+
+.container-marker {
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.container-marker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.container-marker:hover {
+  transform: scale(1.4);
+}
 @media (max-width: 700px) {
   #map {
     height: calc(100vh - 60px - 56px - 40px - 48px);
