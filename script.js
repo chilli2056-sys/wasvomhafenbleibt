@@ -135,7 +135,7 @@ function show20kmRoute() {
 // ============================================================
 function createMarkerForStation(station) {
   const zoom = map.getZoom();
-const MARKER_SIZE = Math.max(35, 80 - zoom * 2);
+const MARKER_SIZE = Math.max(90 - zoom * 2);
 
 const markerHtml = `
   <div class="container-marker" title="${station.name}" style="width:${MARKER_SIZE}px;height:${MARKER_SIZE}px;">
@@ -152,11 +152,11 @@ ${station.foto
   : `<rect x="2" y="2" width="36" height="36" fill="#2f5f8f" />`
 }
 
-<rect x="2" y="2" width="36" height="36" fill="none" stroke="black" stroke-width="2"/>
+<rect x="2" y="2" width="36" height="36" fill="none" stroke="#8E2F2F" stroke-width="0,5"/>
       
       <!-- Zwei Türlinien -->
-      <line x1="18" y1="2" x2="18" y2="38" stroke="black" stroke-width="2"/>
-      <line x1="22" y1="2" x2="22" y2="38" stroke="black" stroke-width="2"/>
+      <line x1="18" y1="1" x2="18" y2="38" stroke="#8E2F2F" stroke-width="0,5"/>
+      <line x1="22" y1="1" x2="22" y2="38" stroke="#8E2F2F" stroke-width="0,5"/>
     </svg>
   </div>
 `;
