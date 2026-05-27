@@ -6,8 +6,18 @@
   <title>Bremen Route</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.9.0/maptiler-sdk.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
+  <style>
+    #map {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 100vh !important;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body>
 
@@ -19,35 +29,425 @@
   </nav>
 </header>
 
+<!-- Buttons oben rechts -->
+<div id="karten-buttons">
+  <button id="fahrrad-btn" title="Fahrradroute ein/ausblenden">
+    <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="3.5" cy="12.5" r="2.8" stroke="black" stroke-width="1.2"/>
+      <circle cx="16.5" cy="12.5" r="2.8" stroke="black" stroke-width="1.2"/>
+      <polyline points="3.5,12.5 7,4 12,4 16.5,12.5" stroke="black" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+      <polyline points="7,4 10,12.5" stroke="black" stroke-width="1.2" fill="none"/>
+      <line x1="10" y1="4" x2="10" y2="2" stroke="black" stroke-width="1.2" stroke-linecap="square"/>
+      <line x1="8.5" y1="2" x2="11.5" y2="2" stroke="black" stroke-width="1.2" stroke-linecap="square"/>
+    </svg>
+  </button>
+  <a id="route-download-btn" href="KOMOOT-LINK-HIER" target="_blank" title="Route herunterladen">
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="8" y1="1" x2="8" y2="12" stroke="black" stroke-width="1.2" stroke-linecap="square"/>
+      <polyline points="4,8 8,13 12,8" stroke="black" stroke-width="1.2" stroke-linejoin="square" fill="none"/>
+      <line x1="1" y1="17" x2="15" y2="17" stroke="black" stroke-width="1.2" stroke-linecap="square"/>
+    </svg>
+  </a>
+</div>
+
 <div id="map"></div>
 
-<div id="sidebar">
-  <div id="resize-handle">
-    <span>Informationen</span>
-    <span id="toggle-icon">▲</span>
+<div id="info-panel">
+  <div id="info-panel-inner">
+    <button id="info-close">✕</button>
+    <button id="info-foto-vollbild">⤢</button>
+    <button id="kommentar-foto-toggle" title="Kommentare ein/ausblenden">
+      <svg width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1h14v10H9l-3 3v-3H1V1Z" stroke="black" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- 1. FOTO -->
+    <div id="info-foto-bereich">
+      <div id="info-foto-wrapper">
+        <img id="info-foto-img" src="" alt="" />
+        <div id="info-foto-controls">
+          <button id="info-foto-prev">‹</button>
+          <button id="info-foto-next">›</button>
+        </div>
+      </div>
+      <div id="kommentar-notizzettel"></div>
+    </div>
+
+    <!-- 2. KASTEN + TEXT -->
+    <div id="info-scroll">
+      <div id="info-kasten">
+        <div id="info-kasten-links">
+          <span id="info-name"></span>
+          <span id="info-koordinaten"></span>
+        </div>
+        <div id="info-kasten-rechts">
+          <span id="info-zeitspannen"></span>
+          <span id="info-themen"></span>
+        </div>
+      </div>
+      <p id="info-beschreibung"></p>
+      <p id="info-routen"></p>
+      <div id="info-scroll-spacer"></div>
+    </div>
+
+    <!-- 3. KOMMENTAR-FORMULAR sticky -->
+    <div id="kommentar-formular">
+      <textarea id="kommentar-text" placeholder="Kommentar schreiben…" maxlength="300"></textarea>
+      <div id="kommentar-formular-footer">
+        <input id="kommentar-name" type="text" placeholder="Name (optional)" maxlength="40" />
+        <span id="kommentar-anzahl"></span>
+        <button id="kommentar-senden">Senden</button>
+      </div>
+    </div>
+
   </div>
-  <div id="sidebar-inner">
-    <div id="content"></div>
-  </div>
+</div>
+
+<div id="info-vollbild-overlay">
+  <button id="info-vollbild-close">✕</button>
+  <button id="info-vollbild-prev">‹</button>
+  <img id="info-vollbild-img" src="" alt="" />
+  <button id="info-vollbild-next">›</button>
 </div>
 
 <div id="map-themen-bar">
   <button class="themen-chip" data-route="10">10 km Fahrradtour</button>
   <button class="themen-chip" data-route="20">20 km Fahrradtour</button>
-  <button class="themen-chip" data-thema="kolonialismus">Kolonialismus</button>
-  <button class="themen-chip" data-thema="nationalsozialismus">Nationalsozialismus</button>
-  <button class="themen-chip" data-thema="industrie">Industrie</button>
+  <button class="themen-chip" data-thema="gleise">Gleissysteme</button>
+  <button class="themen-chip" data-thema="werften">Werften</button>
+  <button class="themen-chip" data-thema="zusammenkünfte">Zusammenkünfte</button>
 </div>
 
 <footer>
   <div class="footer-content">
-    <span>Was vom Hafen bleibt</span>
-    <span>2026</span>
+    <a href="about.html" class="footer-link">About</a>
+    <a href="impressum.html" class="footer-link">Impressum</a>
+    <a href="datenschutz.html" class="footer-link">Datenschutz</a>
   </div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="stations.js"></script>
+<script src="texte.js"></script>
 <script src="script.js"></script>
+<!-- ── INTRO OVERLAY ── -->
+<style>
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    transform: translateY(0);
+    will-change: transform;
+    background: transparent;
+    pointer-events: all;
+  }
+
+  #intro.gone { display: none; }
+
+  #intro-schleier {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    z-index: 0;
+  }
+
+  #intro-hintergrund {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .wort-block {
+    position: absolute;
+    font-family: 'Romense', Helvetica, Arial, sans-serif;
+    font-size: clamp(40px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 0.9;
+    color: #1F4E79;
+    opacity: 1;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  #intro-river {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  .intro-container {
+    position: absolute;
+    border: 1px solid black;
+    background: #e8e8e8;
+    overflow: hidden;
+  }
+
+  .intro-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.9;
+  }
+
+  #intro-pull-area {
+    position: relative;
+    z-index: 4;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0 28px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+
+  #intro-pull-area:active { cursor: grabbing; }
+
+  #intro-pull-line {
+    width: 1px;
+    height: 40px;
+    background: black;
+    margin-bottom: 10px;
+  }
+
+  #intro-pull-arrow {
+    width: 36px;
+    height: 36px;
+    border: 1px solid black;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: black;
+    animation: intro-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes intro-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  #intro-gyro-btn {
+    display: none;
+    position: absolute;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: white;
+    border: 1px solid black;
+    padding: 8px 16px;
+    font-family: 'Heming', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+  }
+</style>
+
+<div id="intro">
+  <div id="intro-schleier"></div>
+  <div id="intro-hintergrund"></div>
+  <div id="intro-river"></div>
+  <button id="intro-gyro-btn">Bewegungssteuerung erlauben</button>
+  <div id="intro-pull-area">
+    <div id="intro-pull-line"></div>
+    <div id="intro-pull-arrow">↑</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const intro     = document.getElementById('intro');
+  const hgEl      = document.getElementById('intro-hintergrund');
+  const riverEl   = document.getElementById('intro-river');
+  const pullArea  = document.getElementById('intro-pull-area');
+  const pullLine  = document.getElementById('intro-pull-line');
+  const pullArrow = document.getElementById('intro-pull-arrow');
+  const gyroBtn   = document.getElementById('intro-gyro-btn');
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // ── HINTERGRUND-TEXT ──
+  const woerter = ['WAS', 'VOM', 'HAFEN', 'BLEIBT'];
+  const slots = woerter.map(() => ({ x: Math.random() * W * 0.7, y: Math.random() * H * 0.7 + H * 0.05 }));
+  slots.sort((a, b) => a.x - b.x);
+
+  const wortData = [];
+  slots.forEach((slot, i) => {
+    const el = document.createElement('div');
+    el.className = 'wort-block';
+    el.textContent = woerter[i];
+    el.style.zIndex = 4; // immer über den Fotos
+    hgEl.appendChild(el);
+
+    wortData.push({
+      el,
+      x: slot.x,
+      y: slot.y,
+      speed: 0.15 + Math.random() * 0.2,
+      dAmp: 6 + Math.random() * 10,
+      dFreq: 0.0005 + Math.random() * 0.0004,
+      dOff: Math.random() * Math.PI * 2
+    });
+  });
+
+  // ── FLOATING CONTAINERS ──
+  const fotos = (typeof stations !== 'undefined')
+    ? stations.filter(s => s.foto).map(s => s.foto) : [];
+  const anzahl = Math.max(6, fotos.length);
+  const SIZE = W * 0.25; // Basis-"Fläche" = SIZE²
+  const containerData = [];
+
+  for (let i = 0; i < anzahl; i++) {
+    const fotoSrc = fotos[i % Math.max(fotos.length, 1)];
+    const startX  = Math.random() * (W * 0.75);
+    const startY  = (i / anzahl) * H * 1.6 + Math.random() * 60;
+    const speed   = 0.25 + Math.random() * 0.35;
+    const dAmp    = 8 + Math.random() * 14;
+    const dFreq   = 0.0008 + Math.random() * 0.0006;
+    const dOff    = Math.random() * Math.PI * 2;
+
+    const el = document.createElement('div');
+    el.className = 'intro-container';
+    el.style.zIndex = 3;
+    el.style.left   = startX + 'px';
+    el.style.top    = startY + 'px';
+    el.style.width  = SIZE + 'px';
+    el.style.height = SIZE + 'px';
+
+    if (fotoSrc) {
+      const img = document.createElement('img');
+      img.src = fotoSrc;
+      img.addEventListener('load', () => {
+        const ratio = img.naturalHeight / img.naturalWidth;
+        const sqrtR = Math.sqrt(ratio);
+        const cw = Math.round(SIZE / sqrtR);
+        const ch = Math.round(SIZE * sqrtR);
+        el.style.width  = cw + 'px';
+        el.style.height = ch + 'px';
+        const d = containerData.find(c => c.el === el);
+        if (d) { d.cw = cw; d.ch = ch; }
+      });
+      el.appendChild(img);
+    }
+
+    riverEl.appendChild(el);
+    containerData.push({ el, x: startX, y: startY, speed, dAmp, dFreq, dOff, cw: SIZE, ch: SIZE });
+  }
+
+  // ── SENSOR ──
+  let tiltX = 0;
+  document.addEventListener('mousemove', e => { tiltX = (e.clientX / W - 0.5) * 2; });
+
+  function aktiviereGyro() {
+    window.addEventListener('deviceorientation', e => {
+      tiltX = Math.max(-1, Math.min(1, (e.gamma || 0) / 30));
+    });
+  }
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    gyroBtn.style.display = 'block';
+    gyroBtn.addEventListener('click', () => {
+      DeviceOrientationEvent.requestPermission().then(s => {
+        if (s === 'granted') { aktiviereGyro(); gyroBtn.style.display = 'none'; }
+      });
+    });
+  } else if (!isIOS) {
+    aktiviereGyro();
+  }
+
+  // ── ANIMATION ──
+  let introGone = false;
+  let lastTime  = null;
+
+  function animate(ts) {
+    if (!lastTime) lastTime = ts;
+    const dt = Math.min(ts - lastTime, 50);
+    lastTime = ts;
+
+    containerData.forEach(c => {
+      c.y -= c.speed * (dt / 16);
+      if (c.y + c.ch < -20) { c.y = H + Math.random() * 80; c.x = Math.random() * (W - c.cw); }
+      const wave   = Math.sin(ts * c.dFreq + c.dOff) * c.dAmp;
+      const sensor = tiltX * 18;
+      c.el.style.left = (c.x + wave + sensor) + 'px';
+      c.el.style.top  = c.y + 'px';
+    });
+
+    wortData.forEach(w => {
+      w.y -= w.speed * (dt / 16);
+      if (w.y < -120) { w.y = H + Math.random() * 60; w.x = Math.random() * W * 0.7; }
+      const wave   = Math.sin(ts * w.dFreq + w.dOff) * w.dAmp;
+      const sensor = tiltX * 12;
+      w.el.style.left = (w.x + wave + sensor) + 'px';
+      w.el.style.top  = w.y + 'px';
+    });
+
+    if (!introGone) requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+
+  // ── PULL ──
+  let dragging = false, startY_ = 0, currentDy = 0;
+  const THRESHOLD = 80;
+
+  function getY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+
+  function onStart(e) {
+    if (introGone) return;
+    dragging = true; startY_ = getY(e);
+    intro.style.transition = 'none';
+    pullArrow.style.animation = 'none';
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    currentDy = Math.max(0, startY_ - getY(e));
+    intro.style.transform = `translateY(-${Math.min(currentDy, H) * 0.6}px)`;
+    pullLine.style.height = (40 + Math.min(currentDy * 0.4, 60)) + 'px';
+  }
+
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    if (currentDy > THRESHOLD) { dismiss(); }
+    else {
+      intro.style.transition = 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+      intro.style.transform = 'translateY(0)';
+      pullLine.style.height = '40px';
+      pullArrow.style.animation = 'intro-bounce 2s ease-in-out infinite';
+    }
+    currentDy = 0;
+  }
+
+  function dismiss() {
+    introGone = true;
+    intro.style.transition = 'transform 0.7s cubic-bezier(0.77,0,0.18,1)';
+    intro.style.transform = 'translateY(-100%)';
+    gyroBtn.style.display = 'none';
+    setTimeout(() => intro.classList.add('gone'), 750);
+  }
+
+  pullArea.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  intro.addEventListener('touchstart', onStart, { passive: true });
+  document.addEventListener('touchmove', onMove, { passive: true });
+  document.addEventListener('touchend', onEnd);
+  pullArrow.addEventListener('click', dismiss);
+})();
+</script>
 </body>
 </html>
