@@ -294,14 +294,12 @@ function addCard(station) {
   if (typeof kommentareZuruecksetzen === 'function') kommentareZuruecksetzen(station.id);
 
   infoPanel.classList.add('open');
-  const kb = document.getElementById('karten-buttons');
-  if (kb) kb.style.display = 'none';
+  document.body.classList.add('panel-open');
 }
 
 infoPanelClose.addEventListener('click', () => {
   infoPanel.classList.remove('open');
-  const kb = document.getElementById('karten-buttons');
-  if (kb) kb.style.display = 'flex';
+  document.body.classList.remove('panel-open');
 });
 
 // Swipe auf dem Foto
