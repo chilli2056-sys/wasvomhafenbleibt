@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Was vom Hafen bleibt</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: white; }
+
+    #admin-login {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    #admin-login h1 {
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 18px;
+      text-transform: uppercase;
+      color: #1F4E79;
+    }
+
+    #admin-login input {
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid black;
+      padding: 10px 12px;
+      font-family: 'Heming', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+    }
+
+    #admin-login input:focus { outline: none; border-color: #1F4E79; }
+
+    #admin-login button {
+      background: black;
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    #admin-panel { display: none; padding: 60px 16px 80px; max-width: 600px; margin: 0 auto; }
+
+    #admin-panel h1 {
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 18px;
+      text-transform: uppercase;
+      color: #1F4E79;
+      margin-bottom: 24px;
+    }
+
+    .admin-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .admin-filter button {
+      border: 1px solid black;
+      background: white;
+      padding: 6px 14px;
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .admin-filter button.aktiv { background: black; color: white; }
+
+    .kommentar-card {
+      border: 1px solid black;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .kommentar-card.pending { border-color: #9a3f2f; }
+
+    .kommentar-station {
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .kommentar-text {
+      font-family: 'Heming', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      color: black;
+    }
+
+    .kommentar-meta {
+      font-family: 'Heming', Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #888;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .kommentar-actions { display: flex; gap: 8px; }
+
+    .btn-freischalten {
+      background: black;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-loeschen {
+      background: white;
+      color: black;
+      border: 1px solid black;
+      padding: 8px 16px;
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    #leer-hinweis {
+      font-family: 'Heming', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    #logout-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: white;
+      border: 1px solid black;
+      padding: 8px 16px;
+      font-family: 'Romense', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+<div id="admin-login">
+  <h1>Admin</h1>
+  <input type="password" id="pw-input" placeholder="Passwort" />
+  <button id="pw-btn">Anmelden</button>
+  <p id="pw-fehler" style="color:#9a3f2f;font-family:Heming,sans-serif;font-size:13px;"></p>
+</div>
+
+<div id="admin-panel">
+  <h1>Kommentare</h1>
+  <div class="admin-filter">
+    <button class="aktiv" data-filter="pending">Wartend</button>
+    <button data-filter="alle">Alle</button>
+    <button data-filter="freigegeben">Freigegeben</button>
+  </div>
+  <div id="kommentar-liste"></div>
+  <div id="leer-hinweis"></div>
+</div>
+
+<button id="logout-btn" style="display:none;">Abmelden</button>
+
+<script src="stations.js"></script>
+<script>
+const SUPABASE_URL = 'https://frxclqyeimupmaiuvndl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_zeBajWW8Ab2TjAYboip_yg_il422nwf';
+const ADMIN_PW    = 'hafen2026';
+
+let aktuellerFilter = 'pending';
+
+// Station-Name Lookup
+const stationName = {};
+if (typeof stations !== 'undefined') {
+  stations.forEach(s => { stationName[s.id] = s.name; });
+}
+
+async function sbFetch(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || ''
+    },
+    ...options
+  });
+  if (!res.ok) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function ladeKommentare() {
+  const liste = document.getElementById('kommentar-liste');
+  const hinweis = document.getElementById('leer-hinweis');
+  liste.innerHTML = '';
+  hinweis.textContent = 'Laden…';
+
+  let query = 'kommentare?order=erstellt_am.desc';
+  if (aktuellerFilter === 'pending')      query += '&freigegeben=eq.false';
+  if (aktuellerFilter === 'freigegeben')  query += '&freigegeben=eq.true';
+
+  const data = await sbFetch(query);
+  if (!data || data.length === 0) {
+    hinweis.textContent = aktuellerFilter === 'pending'
+      ? 'Keine wartenden Kommentare.' : 'Keine Kommentare gefunden.';
+    return;
+  }
+
+  hinweis.textContent = '';
+  data.forEach(k => {
+    const card = document.createElement('div');
+    card.className = 'kommentar-card' + (!k.freigegeben ? ' pending' : '');
+
+    card.innerHTML = `
+      <div class="kommentar-station">${stationName[k.station_id] || 'Station ' + k.station_id}</div>
+      <div class="kommentar-text">${k.text}</div>
+      <div class="kommentar-meta">
+        <span>${k.name}</span>
+        <span>${k.datum}</span>
+      </div>
+      <div class="kommentar-actions">
+        ${!k.freigegeben ? `<button class="btn-freischalten" data-id="${k.id}">Freischalten</button>` : '<span style="font-family:Heming,sans-serif;font-size:12px;color:#888;">✓ Freigegeben</span>'}
+        <button class="btn-loeschen" data-id="${k.id}">Löschen</button>
+      </div>`;
+
+    card.querySelector('.btn-freischalten')?.addEventListener('click', async () => {
+      await sbFetch(`kommentare?id=eq.${k.id}`, {
+        method: 'PATCH', prefer: 'return=minimal',
+        body: JSON.stringify({ freigegeben: true })
+      });
+      ladeKommentare();
+    });
+
+    card.querySelector('.btn-loeschen').addEventListener('click', async () => {
+      if (!confirm('Kommentar wirklich löschen?')) return;
+      await sbFetch(`kommentare?id=eq.${k.id}`, {
+        method: 'DELETE', prefer: 'return=minimal'
+      });
+      ladeKommentare();
+    });
+
+    liste.appendChild(card);
+  });
+}
+
+// Login
+document.getElementById('pw-btn').addEventListener('click', () => {
+  if (document.getElementById('pw-input').value === ADMIN_PW) {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('logout-btn').style.display = 'block';
+    ladeKommentare();
+  } else {
+    document.getElementById('pw-fehler').textContent = 'Falsches Passwort.';
+  }
+});
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('pw-btn').click();
+});
+
+// Filter
+document.querySelectorAll('.admin-filter button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.admin-filter button').forEach(b => b.classList.remove('aktiv'));
+    btn.classList.add('aktiv');
+    aktuellerFilter = btn.dataset.filter;
+    ladeKommentare();
+  });
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('pw-input').value = '';
+});
+</script>
+
+</body>
+</html>
