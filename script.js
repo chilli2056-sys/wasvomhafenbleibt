@@ -294,10 +294,14 @@ function addCard(station) {
   if (typeof kommentareZuruecksetzen === 'function') kommentareZuruecksetzen(station.id);
 
   infoPanel.classList.add('open');
+  const kb = document.getElementById('karten-buttons');
+  if (kb) kb.style.display = 'none';
 }
 
 infoPanelClose.addEventListener('click', () => {
   infoPanel.classList.remove('open');
+  const kb = document.getElementById('karten-buttons');
+  if (kb) kb.style.display = 'flex';
 });
 
 // Swipe auf dem Foto
@@ -350,9 +354,6 @@ vollbildNext.addEventListener('click', () => {
 // KOMMENTARE
 // ============================================================
 
-const SUPABASE_URL = 'https://frxclqyeimupmaiuvndl.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_zeBajWW8Ab2TjAYboip_yg_il422nwf';
-
 const ADMIN_PW = 'hafen2026';
 let istAdmin = sessionStorage.getItem('hafen_admin') === '1';
 
@@ -365,56 +366,32 @@ let istAdmin = sessionStorage.getItem('hafen_admin') === '1';
   }
 })();
 
-async function sbFetch(path, options = {}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': options.prefer || ''
-    },
-    ...options
-  });
-  if (!res.ok) return null;
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
 const KommentarStore = {
-  async laden(stationId) {
-    const data = await sbFetch(`kommentare?station_id=eq.${stationId}&order=erstellt_am.asc`);
-    return data || [];
+  laden(id) {
+    try { return JSON.parse(localStorage.getItem('k_' + id) || '[]'); }
+    catch { return []; }
   },
-  async speichern(stationId, k) {
-    await sbFetch('kommentare', {
-      method: 'POST',
-      prefer: 'return=minimal',
-      body: JSON.stringify({
-        station_id: stationId,
-        text: k.text,
-        name: k.name,
-        datum: k.datum,
-        freigegeben: k.freigegeben
-      })
-    });
+  speichern(id, k) {
+    const alle = this.laden(id);
+    alle.push(k);
+    localStorage.setItem('k_' + id, JSON.stringify(alle));
   },
-  async freischalten(id) {
-    await sbFetch(`kommentare?id=eq.${id}`, {
-      method: 'PATCH',
-      prefer: 'return=minimal',
-      body: JSON.stringify({ freigegeben: true })
-    });
+  freischalten(id, kid) {
+    const alle = this.laden(id);
+    const k = alle.find(k => k.id === kid);
+    if (k) { k.freigegeben = true; localStorage.setItem('k_' + id, JSON.stringify(alle)); }
   },
-  async loeschen(id) {
-    await sbFetch(`kommentare?id=eq.${id}`, {
-      method: 'DELETE',
-      prefer: 'return=minimal'
-    });
-  }
+  loeschen(id, kid) {
+    const alle = this.laden(id).filter(k => k.id !== kid);
+    localStorage.setItem('k_' + id, JSON.stringify(alle));
+  },
+  freigeschaltet(id) { return this.laden(id).filter(k => k.freigegeben); },
+  pending(id)        { return this.laden(id).filter(k => !k.freigegeben); }
 };
 
 let kommentareSichtbar = false;
 
+// Zufällige aber stabile Positionen pro Kommentar
 const POSITIONEN = [
   { top: '8%',  left: '4%',   rot: -2   },
   { top: '10%', right: '4%',  rot: 1.5  },
@@ -426,7 +403,7 @@ const POSITIONEN = [
   { top: '70%', right: '15%', rot: -2   },
 ];
 
-async function kommentareZuruecksetzen(stationId) {
+function kommentareZuruecksetzen(stationId) {
   kommentareSichtbar = false;
   const zettel = document.getElementById('kommentar-notizzettel');
   const toggleBtn = document.getElementById('kommentar-foto-toggle');
@@ -436,32 +413,33 @@ async function kommentareZuruecksetzen(stationId) {
   zettel.classList.remove('sichtbar');
   if (toggleBtn) toggleBtn.classList.remove('aktiv');
 
-  const alle = await KommentarStore.laden(stationId);
-  const freigegeben = alle.filter(k => k.freigegeben);
-  const pending = alle.filter(k => !k.freigegeben);
-  const n = freigegeben.length + (istAdmin ? pending.length : 0);
+  const n = KommentarStore.freigeschaltet(stationId).length
+          + (istAdmin ? KommentarStore.pending(stationId).length : 0);
   if (anzahl) anzahl.textContent = n > 0 ? n + (n === 1 ? ' Kommentar' : ' Kommentare') : '';
 }
 
-async function renderKommentare(stationId) {
+function renderKommentare(stationId) {
   const zettel = document.getElementById('kommentar-notizzettel');
   if (!zettel) return;
   zettel.innerHTML = '';
 
-  const alle = await KommentarStore.laden(stationId);
-  const freigegeben = alle.filter(k => k.freigegeben);
-  const pending = alle.filter(k => !k.freigegeben);
-  const anzeigen = [...freigegeben, ...(istAdmin ? pending : [])];
+  const freigegeben = KommentarStore.freigeschaltet(stationId);
+  const pending     = KommentarStore.pending(stationId);
+  const alle        = [...freigegeben, ...(istAdmin ? pending : [])];
 
-  anzeigen.forEach((k, i) => {
+  alle.forEach((k, i) => {
     const pos = POSITIONEN[i % POSITIONEN.length];
     const z = document.createElement('div');
     z.className = 'notizzettel';
     if (!k.freigegeben) z.style.opacity = '0.55';
 
+    // Position setzen
     Object.entries(pos).forEach(([prop, val]) => {
-      if (prop === 'rot') z.style.transform = `rotate(${val}deg)`;
-      else z.style[prop] = val;
+      if (prop === 'rot') {
+        z.style.transform = `rotate(${val}deg)`;
+      } else {
+        z.style[prop] = val;
+      }
     });
 
     z.innerHTML = `<div class="notizzettel-text">${k.text}</div>
@@ -478,20 +456,22 @@ async function renderKommentare(stationId) {
   });
 
   zettel.querySelectorAll('.nz-freischalten').forEach(btn => {
-    btn.addEventListener('click', async e => {
+    btn.addEventListener('click', e => {
       e.stopPropagation();
-      await KommentarStore.freischalten(btn.dataset.id);
+      KommentarStore.freischalten(stationId, btn.dataset.id);
       renderKommentare(stationId);
-      kommentareZuruecksetzen(stationId);
+      const n = KommentarStore.freigeschaltet(stationId).length + KommentarStore.pending(stationId).length;
+      document.getElementById('kommentar-anzahl').textContent = n > 0 ? n + ' Kommentar' + (n !== 1 ? 'e' : '') : '';
     });
   });
 
   zettel.querySelectorAll('.nz-loeschen').forEach(btn => {
-    btn.addEventListener('click', async e => {
+    btn.addEventListener('click', e => {
       e.stopPropagation();
-      await KommentarStore.loeschen(btn.dataset.id);
+      KommentarStore.loeschen(stationId, btn.dataset.id);
       renderKommentare(stationId);
-      kommentareZuruecksetzen(stationId);
+      const n = KommentarStore.freigeschaltet(stationId).length + KommentarStore.pending(stationId).length;
+      document.getElementById('kommentar-anzahl').textContent = n > 0 ? n + ' Kommentar' + (n !== 1 ? 'e' : '') : '';
     });
   });
 }
@@ -509,12 +489,13 @@ if (kommentarFotoToggle) {
 }
 
 // Kommentar senden
-document.getElementById('kommentar-senden').addEventListener('click', async () => {
+document.getElementById('kommentar-senden').addEventListener('click', () => {
   const text = document.getElementById('kommentar-text').value.trim();
   const name = document.getElementById('kommentar-name').value.trim() || 'Anonym';
   if (!text || !aktuelleStationId) return;
 
-  await KommentarStore.speichern(aktuelleStationId, {
+  KommentarStore.speichern(aktuelleStationId, {
+    id: Date.now().toString(),
     text,
     name,
     datum: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }),
@@ -524,6 +505,12 @@ document.getElementById('kommentar-senden').addEventListener('click', async () =
   document.getElementById('kommentar-text').value = '';
   document.getElementById('kommentar-name').value = '';
 
+  const anzahl = document.getElementById('kommentar-anzahl');
+  const n = KommentarStore.freigeschaltet(aktuelleStationId).length
+          + (istAdmin ? KommentarStore.pending(aktuelleStationId).length : 0);
+  if (anzahl) anzahl.textContent = n > 0 ? n + ' Kommentar' + (n !== 1 ? 'e' : '') : '';
+
+  // Kurze Bestätigung im Textarea
   document.getElementById('kommentar-text').placeholder = istAdmin
     ? '✓ Veröffentlicht.'
     : '✓ Danke! Wird nach Freischaltung angezeigt.';
@@ -531,7 +518,6 @@ document.getElementById('kommentar-senden').addEventListener('click', async () =
     document.getElementById('kommentar-text').placeholder = 'Kommentar schreiben…';
   }, 3000);
 
-  await kommentareZuruecksetzen(aktuelleStationId);
   if (kommentareSichtbar) renderKommentare(aktuelleStationId);
 });
 
