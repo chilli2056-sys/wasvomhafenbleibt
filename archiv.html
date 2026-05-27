@@ -12,18 +12,10 @@
       bottom: 96px;
     }
 
-    #archiv-sidebar {
-      bottom: 96px;
-    }
-
     @media (max-width: 700px) {
       #archiv-grid {
         bottom: 108px;
         padding: 14px;
-      }
-
-      #archiv-sidebar {
-        bottom: 108px;
       }
     }
   </style>
@@ -37,29 +29,84 @@
     <a href="kaffeekranz.html">Kaffeekranz</a>
   </nav>
 </header>
-
 <div id="archiv-grid"></div>
 
-<div id="archiv-sidebar">
-  <div id="archiv-handle">
-    <span>Details</span>
-    <span id="archiv-toggle">▲</span>
-  </div>
-  <div id="archiv-sidebar-inner">
-    <div id="archiv-content"></div>
-  </div>
+<div id="archiv-zoom-controls">
+  <button id="zoom-in">+</button>
+  <button id="zoom-out">−</button>
 </div>
 
 <div id="themen-bar"></div>
 
+<div id="info-panel">
+  <div id="info-panel-inner">
+    <button id="info-close">✕</button>
+    <button id="info-foto-vollbild">⤢</button>
+    <button id="kommentar-foto-toggle" title="Kommentare ein/ausblenden">
+      <svg width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1h14v10H9l-3 3v-3H1V1Z" stroke="black" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- 1. FOTO -->
+    <div id="info-foto-bereich">
+      <div id="info-foto-wrapper">
+        <img id="info-foto-img" src="" alt="" />
+        <div id="info-foto-controls">
+          <button id="info-foto-prev">‹</button>
+          <button id="info-foto-next">›</button>
+        </div>
+      </div>
+      <div id="kommentar-notizzettel"></div>
+    </div>
+
+    <!-- 2. KASTEN + TEXT -->
+    <div id="info-scroll">
+      <div id="info-kasten">
+        <div id="info-kasten-links">
+          <span id="info-name"></span>
+          <span id="info-koordinaten"></span>
+        </div>
+        <div id="info-kasten-rechts">
+          <span id="info-zeitspannen"></span>
+          <span id="info-themen"></span>
+        </div>
+      </div>
+      <p id="info-beschreibung"></p>
+      <p id="info-routen"></p>
+      <div id="info-scroll-spacer"></div>
+    </div>
+
+    <!-- 3. KOMMENTAR-FORMULAR sticky -->
+    <div id="kommentar-formular">
+      <textarea id="kommentar-text" placeholder="Kommentar schreiben…" maxlength="300"></textarea>
+      <div id="kommentar-formular-footer">
+        <input id="kommentar-name" type="text" placeholder="Name (optional)" maxlength="40" />
+        <span id="kommentar-anzahl"></span>
+        <button id="kommentar-senden">Senden</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="info-vollbild-overlay">
+  <button id="info-vollbild-close">✕</button>
+  <button id="info-vollbild-prev">‹</button>
+  <img id="info-vollbild-img" src="" alt="" />
+  <button id="info-vollbild-next">›</button>
+</div>
+
 <footer>
   <div class="footer-content">
-    <span>Bremen Projekt</span>
-    <span>2026</span>
+    <a href="about.html" class="footer-link">About</a>
+    <a href="impressum.html" class="footer-link">Impressum</a>
+    <a href="datenschutz.html" class="footer-link">Datenschutz</a>
   </div>
 </footer>
 
 <script src="stations.js"></script>
+<script src="texte.js"></script>
 <script>
 const grid = document.getElementById('archiv-grid');
 const themenBar = document.getElementById('themen-bar');
@@ -157,106 +204,173 @@ function updateArchiv() {
   renderArchiv(filtered);
 }
 
-const archivSidebar = document.getElementById('archiv-sidebar');
-const archivHandle  = document.getElementById('archiv-handle');
-const archivToggle  = document.getElementById('archiv-toggle');
-const archivContent = document.getElementById('archiv-content');
+// ── INFO-PANEL (gleich wie Karte) ────────────────────────────
 
-const MIN_H = 48;
-const MAX_H = () => window.innerHeight - 60 - 96;
+const infoPanel        = document.getElementById('info-panel');
+const infoClose        = document.getElementById('info-close');
+const infoFotoImg      = document.getElementById('info-foto-img');
+const infoPrev         = document.getElementById('info-foto-prev');
+const infoNext         = document.getElementById('info-foto-next');
+const infoVollbild     = document.getElementById('info-foto-vollbild');
+const infoName         = document.getElementById('info-name');
+const infoBeschreibung = document.getElementById('info-beschreibung');
+const infoThemen       = document.getElementById('info-themen');
+const infoRouten       = document.getElementById('info-routen');
+const infoZeitspannen  = document.getElementById('info-zeitspannen');
+const infoKoordinaten  = document.getElementById('info-koordinaten');
+const vollbildOverlay  = document.getElementById('info-vollbild-overlay');
+const vollbildImg      = document.getElementById('info-vollbild-img');
+const vollbildClose    = document.getElementById('info-vollbild-close');
+const vollbildPrev     = document.getElementById('info-vollbild-prev');
+const vollbildNext     = document.getElementById('info-vollbild-next');
 
-let dragging = false;
-let startY = 0;
-let startH = 0;
+let aktiveFotos = [], aktiverFotoIndex = 0;
 
-function getY(e) {
-  return e.touches ? e.touches[0].clientY : e.clientY;
+function aktualisiereFoto() {
+  if (aktiveFotos.length === 0) { infoFotoImg.style.display='none'; document.getElementById('info-foto-controls').style.display='none'; return; }
+  infoFotoImg.style.display = 'block';
+  infoFotoImg.src = aktiveFotos[aktiverFotoIndex];
+  vollbildImg.src = aktiveFotos[aktiverFotoIndex];
+  const m = aktiveFotos.length > 1;
+  document.getElementById('info-foto-controls').style.display = m ? 'flex' : 'none';
+  infoPrev.style.display = m ? 'flex' : 'none';
+  infoNext.style.display = m ? 'flex' : 'none';
 }
 
-archivHandle.addEventListener('mousedown', e => {
-  dragging = true;
-  startY = getY(e);
-  startH = archivSidebar.offsetHeight;
-  document.body.style.userSelect = 'none';
-});
-
-archivHandle.addEventListener('touchstart', e => {
-  dragging = true;
-  startY = getY(e);
-  startH = archivSidebar.offsetHeight;
-}, { passive: true });
-
-document.addEventListener('mousemove', e => {
-  if (!dragging) return;
-
-  let h = startH + (startY - getY(e));
-  h = Math.max(MIN_H, Math.min(h, MAX_H()));
-  archivSidebar.style.height = h + 'px';
-  archivToggle.textContent = h > MIN_H ? '▼' : '▲';
-});
-
-document.addEventListener('touchmove', e => {
-  if (!dragging) return;
-
-  let h = startH + (startY - getY(e));
-  h = Math.max(MIN_H, Math.min(h, MAX_H()));
-  archivSidebar.style.height = h + 'px';
-  archivToggle.textContent = h > MIN_H ? '▼' : '▲';
-}, { passive: true });
-
-document.addEventListener('mouseup', () => {
-  dragging = false;
-  document.body.style.userSelect = '';
-  snap();
-});
-
-document.addEventListener('touchend', () => {
-  dragging = false;
-  snap();
-});
-
-function snap() {
-  if (archivSidebar.offsetHeight < MIN_H + 20) {
-    archivSidebar.style.height = MIN_H + 'px';
-    archivToggle.textContent = '▲';
-  }
-}
-
-archivToggle.addEventListener('click', e => {
-  e.stopPropagation();
-  const isMin = archivSidebar.offsetHeight <= MIN_H + 5;
-  archivSidebar.style.height = isMin ? '40vh' : MIN_H + 'px';
-  archivToggle.textContent = isMin ? '▼' : '▲';
-});
+let aktuelleStationId = null;
 
 function openDetail(station) {
-  const themenText = station.themen ? station.themen.join(', ') : '';
-  const routenText = station.routen ? station.routen.join(', ') : '';
-  const zeitText = station.zeitspannen ? station.zeitspannen.join(', ') : '';
-
-  const fotoHtml = station.foto
-    ? `<img src="${station.foto}" alt="${station.name}" class="card-foto" />`
-    : `<div class="card-foto-placeholder"><span>${station.name}</span></div>`;
-
-  archivContent.innerHTML = `
-    <div class="card">
-      <h3>${station.name}</h3>
-      ${fotoHtml}
-      <p>${station.info}</p>
-      <p><strong>Themen:</strong> ${themenText}</p>
-      <p><strong>Routen:</strong> ${routenText}</p>
-      <p><strong>Zeitspannen:</strong> ${zeitText}</p>
-    </div>
-  `;
-
-  if (archivSidebar.offsetHeight <= MIN_H + 5) {
-    archivSidebar.style.height = '40vh';
-    archivToggle.textContent = '▼';
-  }
+  aktuelleStationId = station.id;
+  aktiveFotos = station.fotos && station.fotos.length > 0 ? station.fotos : (station.foto ? [station.foto] : []);
+  aktiverFotoIndex = 0;
+  infoName.textContent = station.name || '';
+  infoBeschreibung.textContent = (typeof texte !== 'undefined' && texte[station.id]) ? texte[station.id] : (station.info || '');
+  infoThemen.textContent = station.themen ? station.themen.join(', ') : '';
+  infoRouten.textContent = station.routen ? 'Routen: ' + station.routen.join(', ') : '';
+  infoZeitspannen.textContent = station.zeitspannen ? station.zeitspannen.join(', ') : '';
+  if (infoKoordinaten) infoKoordinaten.textContent = station.coords ? station.coords[0].toFixed(4)+' N / '+station.coords[1].toFixed(4)+' O' : '';
+  aktualisiereFoto();
+  kommentareZuruecksetzen(station.id);
+  infoPanel.classList.add('open');
 }
+
+infoClose.addEventListener('click', () => infoPanel.classList.remove('open'));
+
+let swipeStartX = 0;
+infoFotoImg.addEventListener('touchstart', e => { swipeStartX = e.touches[0].clientX; }, {passive:true});
+infoFotoImg.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - swipeStartX;
+  if (Math.abs(dx) > 40 && aktiveFotos.length > 1) {
+    aktiverFotoIndex = dx < 0 ? (aktiverFotoIndex+1)%aktiveFotos.length : (aktiverFotoIndex-1+aktiveFotos.length)%aktiveFotos.length;
+    aktualisiereFoto();
+  }
+}, {passive:true});
+
+infoPrev.addEventListener('click', () => { aktiverFotoIndex=(aktiverFotoIndex-1+aktiveFotos.length)%aktiveFotos.length; aktualisiereFoto(); });
+infoNext.addEventListener('click', () => { aktiverFotoIndex=(aktiverFotoIndex+1)%aktiveFotos.length; aktualisiereFoto(); });
+infoVollbild.addEventListener('click', () => { vollbildImg.src=aktiveFotos[aktiverFotoIndex]; vollbildOverlay.classList.add('open'); });
+vollbildClose.addEventListener('click', () => vollbildOverlay.classList.remove('open'));
+vollbildPrev.addEventListener('click', () => { aktiverFotoIndex=(aktiverFotoIndex-1+aktiveFotos.length)%aktiveFotos.length; aktualisiereFoto(); vollbildImg.src=aktiveFotos[aktiverFotoIndex]; });
+vollbildNext.addEventListener('click', () => { aktiverFotoIndex=(aktiverFotoIndex+1)%aktiveFotos.length; aktualisiereFoto(); vollbildImg.src=aktiveFotos[aktiverFotoIndex]; });
+
+// ── KOMMENTARE ───────────────────────────────────────────────
+
+const ADMIN_PW = 'hafen2026';
+let istAdmin = sessionStorage.getItem('hafen_admin') === '1';
+(function(){ const p=new URLSearchParams(window.location.search); if(p.get('admin')===ADMIN_PW){sessionStorage.setItem('hafen_admin','1');istAdmin=true;window.history.replaceState({},'',window.location.pathname);} })();
+
+const KommentarStore = {
+  laden(id) { try{return JSON.parse(localStorage.getItem('k_'+id)||'[]');}catch{return[];} },
+  speichern(id,k) { const a=this.laden(id);a.push(k);localStorage.setItem('k_'+id,JSON.stringify(a)); },
+  freischalten(id,kid) { const a=this.laden(id);const k=a.find(k=>k.id===kid);if(k){k.freigegeben=true;localStorage.setItem('k_'+id,JSON.stringify(a));} },
+  loeschen(id,kid) { localStorage.setItem('k_'+id,JSON.stringify(this.laden(id).filter(k=>k.id!==kid))); },
+  freigeschaltet(id) { return this.laden(id).filter(k=>k.freigegeben); },
+  pending(id) { return this.laden(id).filter(k=>!k.freigegeben); }
+};
+
+const POSITIONEN = [
+  {top:'8%',left:'4%',rot:-2},{top:'10%',right:'4%',rot:1.5},
+  {top:'45%',left:'3%',rot:1},{top:'50%',right:'3%',rot:-1.5},
+  {top:'25%',left:'30%',rot:2},{top:'65%',left:'20%',rot:-1}
+];
+
+let kommentareSichtbar = false;
+
+function kommentareZuruecksetzen(stationId) {
+  kommentareSichtbar = false;
+  const zettel = document.getElementById('kommentar-notizzettel');
+  const toggle = document.getElementById('kommentar-foto-toggle');
+  const anzahl = document.getElementById('kommentar-anzahl');
+  if (zettel) { zettel.classList.remove('sichtbar'); zettel.innerHTML=''; }
+  if (toggle) toggle.classList.remove('aktiv');
+  const n = KommentarStore.freigeschaltet(stationId).length + (istAdmin ? KommentarStore.pending(stationId).length : 0);
+  if (anzahl) anzahl.textContent = n > 0 ? n+(n===1?' Kommentar':' Kommentare') : '';
+}
+
+function renderKommentare(stationId) {
+  const zettel = document.getElementById('kommentar-notizzettel');
+  if (!zettel) return;
+  zettel.innerHTML = '';
+  const alle = [...KommentarStore.freigeschaltet(stationId), ...(istAdmin?KommentarStore.pending(stationId):[])];
+  alle.forEach((k,i) => {
+    const pos = POSITIONEN[i%POSITIONEN.length];
+    const z = document.createElement('div');
+    z.className = 'notizzettel';
+    if (!k.freigegeben) z.style.opacity='0.55';
+    Object.entries(pos).forEach(([p,v]) => { if(p==='rot') z.style.transform=`rotate(${v}deg)`; else z.style[p]=v; });
+    z.innerHTML = `<div class="notizzettel-text">${k.text}</div><div class="notizzettel-meta"><span>${k.name}</span><span>${k.datum}</span></div>
+      ${!k.freigegeben&&istAdmin?`<div style="display:flex;gap:4px;margin-top:4px;"><button class="nz-freischalten" data-id="${k.id}">✓</button><button class="nz-loeschen" data-id="${k.id}">✕</button></div>`:''}
+      ${k.freigegeben&&istAdmin?`<button class="nz-loeschen" data-id="${k.id}" style="margin-top:4px;">✕</button>`:''}`;
+    z.addEventListener('click', () => z.classList.toggle('expanded'));
+    zettel.appendChild(z);
+  });
+  zettel.querySelectorAll('.nz-freischalten').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); KommentarStore.freischalten(stationId,btn.dataset.id); renderKommentare(stationId); }); });
+  zettel.querySelectorAll('.nz-loeschen').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); KommentarStore.loeschen(stationId,btn.dataset.id); renderKommentare(stationId); }); });
+}
+
+const kommentarToggle = document.getElementById('kommentar-foto-toggle');
+if (kommentarToggle) {
+  kommentarToggle.addEventListener('click', () => {
+    if (!aktuelleStationId) return;
+    kommentareSichtbar = !kommentareSichtbar;
+    document.getElementById('kommentar-notizzettel').classList.toggle('sichtbar', kommentareSichtbar);
+    kommentarToggle.classList.toggle('aktiv', kommentareSichtbar);
+    if (kommentareSichtbar) renderKommentare(aktuelleStationId);
+  });
+}
+
+document.getElementById('kommentar-senden').addEventListener('click', () => {
+  const text = document.getElementById('kommentar-text').value.trim();
+  const name = document.getElementById('kommentar-name').value.trim() || 'Anonym';
+  if (!text || !aktuelleStationId) return;
+  KommentarStore.speichern(aktuelleStationId, { id:Date.now().toString(), text, name, datum:new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'}), freigegeben:istAdmin });
+  document.getElementById('kommentar-text').value = '';
+  document.getElementById('kommentar-name').value = '';
+  const n = KommentarStore.freigeschaltet(aktuelleStationId).length + (istAdmin?KommentarStore.pending(aktuelleStationId).length:0);
+  document.getElementById('kommentar-anzahl').textContent = n > 0 ? n+(n===1?' Kommentar':' Kommentare') : '';
+  document.getElementById('kommentar-text').placeholder = istAdmin ? '✓ Veröffentlicht.' : '✓ Danke! Wird nach Freischaltung angezeigt.';
+  setTimeout(() => { document.getElementById('kommentar-text').placeholder = 'Kommentar schreiben…'; }, 3000);
+  if (kommentareSichtbar) renderKommentare(aktuelleStationId);
+});
+
+// ── ARCHIV ──────────────────────────────────────────────────
 
 renderThemenBar();
 updateArchiv();
+
+let archivCols = 4;
+function setArchivCols(n) { archivCols=Math.min(Math.max(n,1),8); grid.style.columnCount=archivCols; }
+document.getElementById('zoom-in').addEventListener('click',  () => setArchivCols(archivCols-1));
+document.getElementById('zoom-out').addEventListener('click', () => setArchivCols(archivCols+1));
+
+// Menü
+const menuToggle = document.getElementById('menu-toggle');
+const menuDropdown = document.getElementById('menu-dropdown');
+if (menuToggle) {
+  menuToggle.addEventListener('click', e => { e.stopPropagation(); menuDropdown.classList.toggle('open'); });
+  document.addEventListener('click', () => menuDropdown.classList.remove('open'));
+}
+
 </script>
 </body>
 </html>
