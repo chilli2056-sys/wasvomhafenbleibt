@@ -5,14 +5,31 @@
 
 @font-face {
   font-family: 'Heming';
-  src: url('Heming-Variable.woff2') format('woff2');
-  font-weight: 100 300; /* weil Variable Font */
-  font-style: light;
+  src: url('fonts/Heming-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
 }
+
+@font-face {
+  font-family: 'Romense';
+  src: url('fonts/romense.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Typografie-System
+   Romense 72pt = 96px  → Header
+   Romense 50pt = 67px  → Footer, Buttons
+   Heming  62pt = 83px  → Überschriften
+   Heming  52pt = 69px  → Fließtext
+   Heming  52pt bold    → Markierungen
+   Heming  32pt = 43px  → Fußnoten / Fakten
+*/
 
 body {
   margin: 0;
   font-family: 'Heming', Helvetica, Arial, sans-serif;
+  font-size: 16px; /* Heming 52pt → 16px */
 }
 
 
@@ -23,24 +40,45 @@ header {
   top: 0;
   width: 100%;
   background: white;
-  border-bottom: 1px solid black;
-  padding: 15px 30px;
-  z-index: 1000;
+  z-index: 2500;
+  font-family: 'Romense', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 nav a {
-  margin-right: 30px;
   text-decoration: none;
-  color: black;
+  color: #1F4E79;
+  font-family: 'Romense', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+nav a:first-child {
+  margin-right: auto;
+}
+
+nav a:not(:first-child) {
+  margin-left: 24px;
 }
 
 /* MAP */
 #map {
   position: absolute;
-  top: 60px;
+  top: 0;
   left: 0;
   right: 0;
-  height: calc(100vh - 60px - 40px - 48px);
+  height: calc(100vh - 40px - 48px);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -216,19 +254,38 @@ footer {
   bottom: 0;
   width: 100%;
   height: 40px;
-  border-top: 1px solid black;
   background: transparent;
   display: flex;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 16px;
   z-index: 1001;
 }
 
 .footer-content {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   width: 100%;
 }
+
+.footer-link {
+  color: #1F4E79;
+  text-decoration: none;
+  font-family: 'Romense', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.footer-link:first-child {
+  margin-right: auto;
+}
+
+.footer-link:not(:first-child) {
+  margin-left: 20px;
+}
+
+.footer-link:hover { text-decoration: underline; }
 
 /* THEMENLEISTEN */
 #themen-bar,
@@ -238,12 +295,9 @@ footer {
   right: 0;
   bottom: 40px;
   min-height: 56px;
-  background: rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(0, 0, 0, 0.22);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.14);
-  box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.05);
+  background: transparent;
+  border-top: none;
+  border-bottom: none;
   padding: 8px 12px;
   z-index: 1000;
   display: flex;
@@ -262,13 +316,11 @@ footer {
 .themen-chip {
   flex: 0 0 auto;
   padding: 8px 14px;
-  border: 1px solid rgba(0, 0, 0, 0.22);
-  background: rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: white;
   color: black;
-  font-family: 'Heming', Helvetica, Arial, sans-serif;
-  font-size: 13px;
+  font-family: 'Romense', Helvetica, Arial, sans-serif;
+  font-size: 15px;
   line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
@@ -428,44 +480,48 @@ footer {
 }
 
 /* ARCHIV */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 #archiv-grid {
-  position: fixed;
-  top: 60px;
-  bottom: 96px;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 16px;
+  margin-top: 40px;
+  margin-bottom: 96px;
+  padding: 8px;
+  column-count: 4;
+  column-gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .kachel {
-  width: calc(50% - 8px);
+  break-inside: avoid;
+  margin-bottom: 6px;
   cursor: pointer;
-  animation: sway 3s ease-in-out infinite;
-  transform-origin: top center;
-  background: transparent;
+  position: relative;
+  max-width: 100%;
+  animation: drift 6s ease-in-out infinite;
+  transform-origin: center top;
 }
 
-.kachel:nth-child(even) {
-  animation-delay: -1.5s;
-}
+.kachel:nth-child(3n)   { animation-delay: -2s; animation-duration: 7s; }
+.kachel:nth-child(3n+1) { animation-delay: -4s; animation-duration: 5s; }
+.kachel:nth-child(3n+2) { animation-delay: -1s; animation-duration: 8s; }
 
-@keyframes sway {
-  0%   { transform: rotate(-1deg); }
-  50%  { transform: rotate(1deg); }
-  100% { transform: rotate(-1deg); }
+@keyframes drift {
+  0%   { transform: rotate(-0.4deg); }
+  50%  { transform: rotate(0.4deg); }
+  100% { transform: rotate(-0.4deg); }
 }
 
 .kachel img {
   width: 100%;
+  max-width: 100%;
   height: auto;
   display: block;
   border: 1px solid black;
-  background: transparent;
 }
 
 .kachel-placeholder {
@@ -488,11 +544,41 @@ footer {
 .kachel-label {
   background: transparent;
   color: black;
-  font-size: 12px;
-  padding: 4px 6px;
-  margin-top: 4px;
+  font-size: 11px;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  padding: 3px 5px;
+  margin-top: 3px;
   display: inline-block;
   border: 1px solid black;
+}
+
+/* Zoom-Buttons */
+#archiv-zoom-controls {
+  position: fixed;
+  bottom: 100px;
+  right: 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+#archiv-zoom-controls button {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid black;
+  border-right: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  line-height: 1;
+}
+
+#archiv-zoom-controls button:last-child {
+  border-top: none;
 }
 
 /* RUNDE ROSTROTE MARKERPUNKTE */
@@ -530,7 +616,7 @@ footer {
 }
 @media (max-width: 700px) {
   #map {
-    height: calc(100vh - 60px - 56px - 40px - 48px);
+    height: calc(100vh - 40px - 56px - 40px - 48px);
   }
 
   #nav-menu {
@@ -569,7 +655,528 @@ footer {
   }
 
   #archiv-grid {
-    bottom: 108px;
-    padding: 14px;
+    margin-bottom: 108px;
+    padding: 6px;
+    column-count: 2;
+  }
+
+  .foto-marker-simple img {
+    display: block;
+    cursor: pointer;
   }
 }
+
+/* ============================================================
+   INFO-PANEL
+   ============================================================ */
+
+#info-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#info-panel.open {
+  pointer-events: all;
+  opacity: 1;
+}
+
+#info-panel-inner {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+}
+
+#info-panel.open #info-panel-inner {
+  transform: translateY(0);
+}
+
+/* Schließen- und Vollbild-Button: sticky oben rechts */
+#info-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  background: white;
+  border: 1px solid black;
+  border-right: none;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  margin-bottom: -36px;
+}
+
+#info-foto-vollbild {
+  position: sticky !important;
+  top: 36px;
+  float: right;
+  clear: right;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 16px !important;
+  background: white;
+  border: 1px solid black;
+  border-top: none;
+  border-right: none;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  margin-bottom: -36px;
+}
+
+/* Fixer oberer Bereich: Foto + Kasten */
+#info-fixed-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 5;
+}
+
+/* Kasten */
+#info-kasten {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid black;
+  margin: 0 20px;
+}
+
+#info-kasten-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-right: 1px solid black;
+}
+
+#info-kasten-rechts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+#info-name {
+  font-size: 19px; /* Heming 62pt → Überschrift */
+  font-weight: 600;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  line-height: 1.3;
+}
+
+#info-koordinaten {
+  font-size: 10px; /* Heming 32pt → Fußnoten */
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  color: #555;
+  line-height: 1.3;
+}
+
+#info-zeitspannen,
+#info-themen {
+  font-size: 10px; /* Heming 32pt → Fakten */
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  line-height: 1.4;
+}
+
+/* Scrollbereich: Foto floatet, Text fließt darum */
+#info-scroll {
+  padding: 20px 20px 80px 20px;
+  overflow: hidden;
+}
+
+#info-foto-bereich {
+  position: relative;
+  background: white;
+  z-index: 2;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#info-foto-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+#info-foto-img {
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 700px) {
+  #info-foto-img {
+    max-height: 40vh;
+  }
+}
+
+#info-foto-controls {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  pointer-events: none;
+}
+
+#info-foto-controls button {
+  background: white;
+  border: 1px solid black;
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  pointer-events: all;
+  flex-shrink: 0;
+}
+
+#info-foto-prev { border-left: none; }
+#info-foto-next { border-right: none; }
+
+#info-beschreibung {
+  font-size: 16px; /* Heming 52pt → Fließtext */
+  line-height: 1.7;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  white-space: pre-wrap;
+  margin: 0;
+  display: block;
+}
+
+#info-routen {
+  font-size: 10px; /* Heming 32pt → Fußnoten */
+  color: #777;
+  margin-top: 12px;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  clear: both;
+  display: block;
+}
+
+/* ============================================================
+   VOLLBILD-OVERLAY
+   ============================================================ */
+
+#info-vollbild-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+}
+
+#info-vollbild-overlay.open {
+  display: flex;
+}
+
+#info-vollbild-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+#info-vollbild-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: white;
+  border: 1px solid black;
+  color: black;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#info-vollbild-prev,
+#info-vollbild-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 1px solid black;
+  color: black;
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#info-vollbild-prev { left: 16px; }
+#info-vollbild-next { right: 16px; }
+/* Sprechblasen-Toggle auf dem Foto */
+#kommentar-foto-toggle {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 1px solid black;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 0;
+}
+
+#kommentar-foto-toggle svg path {
+  stroke: black;
+}
+
+#kommentar-foto-toggle:hover {
+  background: #f0f0f0;
+}
+
+#kommentar-foto-toggle.aktiv {
+  background: black;
+  border-color: black;
+}
+
+#kommentar-foto-toggle.aktiv svg path {
+  stroke: white;
+}
+
+/* ============================================================
+   NOTIZZETTEL auf dem Foto
+   ============================================================ */
+
+#kommentar-notizzettel {
+  display: none;
+  position: absolute;
+  inset: 20px;
+  z-index: 8;
+  pointer-events: none;
+}
+
+#kommentar-notizzettel.sichtbar {
+  display: block;
+}
+
+.notizzettel {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 8px 10px;
+  width: 42%;
+  max-width: 160px;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.notizzettel:nth-child(1) { top: 8%;  left: 5%;  transform: rotate(-2deg); }
+.notizzettel:nth-child(2) { top: 12%; right: 5%; transform: rotate(1.5deg); }
+.notizzettel:nth-child(3) { bottom: 10%; left: 8%;  transform: rotate(1deg); }
+.notizzettel:nth-child(4) { bottom: 8%;  right: 6%; transform: rotate(-1.5deg); }
+.notizzettel:nth-child(n+5) { top: 30%; left: 15%; transform: rotate(-1deg); }
+
+.notizzettel:hover { z-index: 9; transform: rotate(0deg) scale(1.04) !important; }
+
+.notizzettel-text {
+  color: black;
+  margin-bottom: 4px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.notizzettel.expanded .notizzettel-text {
+  display: block;
+  overflow: visible;
+}
+
+.notizzettel-meta {
+  font-size: 9px;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+}
+
+.nz-freischalten,
+.nz-loeschen {
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  border: 1px solid black;
+  background: white;
+  color: black;
+}
+
+.nz-freischalten {
+  background: black;
+  color: white;
+}
+
+/* ============================================================
+   KOMMENTAR-FORMULAR — sticky am unteren Rand
+   ============================================================ */
+
+#kommentar-formular {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid black;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+#kommentar-text {
+  width: 100%;
+  height: 56px;
+  border: 1px solid black;
+  padding: 8px 10px;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: none;
+  background: white;
+  color: black;
+  box-sizing: border-box;
+}
+
+#kommentar-text:focus {
+  outline: none;
+  border-color: #1F4E79;
+}
+
+#kommentar-formular-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#kommentar-name {
+  flex: 1;
+  border: 1px solid black;
+  padding: 6px 10px;
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  background: white;
+  color: black;
+  min-width: 0;
+}
+
+#kommentar-name:focus {
+  outline: none;
+  border-color: #1F4E79;
+}
+
+#kommentar-anzahl {
+  font-family: 'Heming', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  color: #888;
+  white-space: nowrap;
+}
+
+#kommentar-senden {
+  background: black;
+  color: white;
+  border: 1px solid black;
+  padding: 6px 14px;
+  font-family: 'Romense', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#kommentar-senden:hover {
+  background: #1F4E79;
+  border-color: #1F4E79;
+}
+
+@media (max-width: 500px) {
+  #kommentar-formular-footer {
+    flex-wrap: wrap;
+  }
+  #kommentar-name {
+    flex-basis: 100%;
+  }
+  #kommentar-senden {
+    flex: 1;
+  }
+}
+/* ============================================================
+   KARTEN-BUTTONS oben rechts
+   ============================================================ */
+
+#karten-buttons {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  z-index: 2500;
+  display: flex;
+  flex-direction: row;
+}
+
+#fahrrad-btn,
+#route-download-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid black;
+  border-top: none;
+  border-right: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  text-decoration: none;
+}
+
+#fahrrad-btn:hover,
+#route-download-btn:hover { background: #f0f0f0; }
+
+#fahrrad-btn.aktiv { background: black; }
+
+#fahrrad-btn.aktiv svg circle,
+#fahrrad-btn.aktiv svg polyline,
+#fahrrad-btn.aktiv svg line { stroke: white; }
