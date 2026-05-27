@@ -1151,7 +1151,7 @@ html, body {
   position: fixed;
   top: 44px;
   right: 0;
-  z-index: 2500;
+  z-index: 1500;
   display: flex;
   flex-direction: row;
 }
@@ -1180,3 +1180,7 @@ html, body {
 #fahrrad-btn.aktiv svg circle,
 #fahrrad-btn.aktiv svg polyline,
 #fahrrad-btn.aktiv svg line { stroke: white; }
+
+/* Buttons hinter Info-Panel verstecken wenn Panel offen */
+#info-panel.open ~ #karten-buttons,
+body.panel-open #karten-buttons { display: none !important; }
