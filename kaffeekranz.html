@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kaffeekranz</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>Kaffeekranz – Was vom Hafen bleibt</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,17 +16,125 @@
   </nav>
 </header>
 
-<div style="padding: 80px 30px;">
-  <h1>Kaffeekranz</h1>
-  <p>Hier kannst du später Inhalte einbauen.</p>
-</div>
+<main style="padding: 60px 30px 80px; max-width: 600px;">
+
+  <h1 style="font-family: 'Romense', Helvetica, Arial, sans-serif; font-size: 22px; text-transform: uppercase; color: #1F4E79; margin-bottom: 8px;">Kaffeekranz</h1>
+  <p style="font-family: 'Heming', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.7; margin-bottom: 32px; color: #555;">Schreib mir, ich freuen mich über neue Orte, Geschichten und Erinnerungen zum Hafen.</p>
+
+  <form id="kontakt-form">
+
+    <div class="form-group">
+      <label for="f-name">Name</label>
+      <input type="text" id="f-name" name="name" placeholder="Dein Name" autocomplete="name" />
+    </div>
+
+    <div class="form-group">
+      <label for="f-email">E-Mail</label>
+      <input type="email" id="f-email" name="email" placeholder="deine@email.de" autocomplete="email" />
+    </div>
+
+    <div class="form-group">
+      <label for="f-betreff">Betreff</label>
+      <input type="text" id="f-betreff" name="betreff" placeholder="Worum geht es?" />
+    </div>
+
+    <div class="form-group">
+      <label for="f-nachricht">Nachricht</label>
+      <textarea id="f-nachricht" name="nachricht" rows="6" placeholder="Deine Nachricht…"></textarea>
+    </div>
+
+    <button type="submit" id="kontakt-senden">Senden</button>
+    <p id="kontakt-bestaetigung"></p>
+
+  </form>
+
+</main>
 
 <footer>
   <div class="footer-content">
-    <span>Bremen Projekt</span>
-    <span>2026</span>
+    <a href="about.html" class="footer-link">About</a>
+    <a href="impressum.html" class="footer-link">Impressum</a>
+    <a href="datenschutz.html" class="footer-link">Datenschutz</a>
   </div>
 </footer>
+
+<style>
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-family: 'Romense', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    border: 1px solid black;
+    padding: 10px 12px;
+    font-family: 'Heming', Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    background: white;
+    color: black;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #1F4E79;
+  }
+
+  #kontakt-senden {
+    background: black;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-family: 'Romense', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  #kontakt-senden:hover { background: #1F4E79; }
+
+  #kontakt-bestaetigung {
+    margin-top: 14px;
+    font-family: 'Heming', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+
+<script>
+  document.getElementById('kontakt-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('f-name').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const nachricht = document.getElementById('f-nachricht').value.trim();
+
+    if (!name || !email || !nachricht) {
+      document.getElementById('kontakt-bestaetigung').textContent = 'Bitte fülle Name, E-Mail und Nachricht aus.';
+      return;
+    }
+
+    // Mailto-Fallback — ersetze durch echte Backend-URL wenn vorhanden
+    const betreff = encodeURIComponent(document.getElementById('f-betreff').value || 'Nachricht vom Kaffeekranz');
+    const body = encodeURIComponent(`Name: ${name}\n\n${nachricht}`);
+    window.location.href = `mailto:DEINE@EMAIL.DE?subject=${betreff}&body=${body}`;
+
+    document.getElementById('kontakt-bestaetigung').textContent = '✓ Dein E-Mail-Programm öffnet sich gleich.';
+  });
+</script>
 
 </body>
 </html>
